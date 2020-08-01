@@ -12,3 +12,4 @@
 
 - [JS基本数据类型](https://github.com/ZHHHH9980/ZH-FEnote/blob/master/JavaScript/类型/JavaScript基本数据类型.md)
 - JS引用数据类型
+- [JavaScript数据类型转换汇总](https://github.com/ZHHHH9980/ZH-FEnote/blob/master/JavaScript/类型/JavaScript数据类型转换汇总.md)
