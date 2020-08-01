@@ -2,7 +2,7 @@
 
 》》建立知识框架，整理琐碎的知识，打造知识体系《《
 
-[![](https://img.shields.io/badge/Note-JavaScript-important)](点击跳转的链接)[![](https://img.shields.io/badge/Note-Css-blue)](点击跳转的链接)
+[![](https://img.shields.io/badge/Note-JavaScript-important)](点击跳转的链接)	[![](https://img.shields.io/badge/Note-Css-blue)](点击跳转的链接)
 
 
 
