@@ -10,5 +10,5 @@
 
 ### 类型
 
-- [JS基本数据类型](\JavaScript\类型\JavaScript基本数据类型.md)
+- [JS基本数据类型](.\JavaScript\类型\JavaScript基本数据类型.md)
 - JS引用数据类型
