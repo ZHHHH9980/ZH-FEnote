@@ -46,13 +46,17 @@
 
 - http
   - [http概述](https://github.com/ZHHHH9980/ZH-FEnote/blob/master/计算机网络/http/http概述.md)
+  - [http相关应用概念](https://github.com/ZHHHH9980/ZH-FEnote/blob/master/计算机网络/http/http相关应用概念.md)
 
 
 
 ## 前端工程化实践
 
 - jQuery源码学习
+  
+  - 根据jQuery实现一个简易版的zQuery
+  
   - [jQSC-jQuery.each](./前端工程实践/jQuery源码学习/jQSC-jQuery.each.md)
   - [jQSC-事件绑定-搭建框架](./前端工程实践/jQuery源码学习/jQSC-事件绑定-搭建框架.md)
-  - [jQSC-jQuery.extend](./前端工程实践/jQuery源码学习/jQSC-jQuery.extend.md)
+  - [jQSC-jQuery.extend-为zQuery添加可扩展能力](./前端工程实践/jQuery源码学习/jQSC-jQuery.extend.md)
 
