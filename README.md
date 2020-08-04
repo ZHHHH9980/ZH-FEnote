@@ -28,15 +28,30 @@
 - 内存管理
   - [内存分配、回收以及内存泄漏原理](./JavaScript/底层/内存管理与内存泄漏原理.md)
 
+
+
+### 正则表达式
+
+- [正则基础](./JavaScript/正则表达式/正则基础.md)
+
+
+
+
+
 ## Css
 
-
-
-...持续更新ing
-
-
+-待更新
 
 ## 计算机网络
 
 - http
   - [http概述](https://github.com/ZHHHH9980/ZH-FEnote/blob/master/计算机网络/http/http概述.md)
+
+
+
+## 前端工程化实践
+
+- jQuery源码学习
+  - [jQSC-jQuery.each](./前端工程实践/jQuery源码学习/jQSC-jQuery.each.md)
+  - [jQSC-实现简易事件绑定-支持数据缓存](./前端工程实践/jQuery源码学习/jQSC-实现简易事件绑定-支持数据缓存.md)
+
