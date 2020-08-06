@@ -992,117 +992,117 @@ var dataPriv = new Data();
             }
         };
 
-        var dataPriv = new Data();
+    var dataPriv = new Data();
 
-        // var init = {
-        //     elem: {
-        //         jQuery351046541611:{
-        //             events: {
-        //                 // 'click'
-        //                 handlers: [
-        //                     handleObj: {
-        //                         type: type, // 填充类型
-        //                         // fn
-        //                         handler: f(),
-        //                         // handler.guid fn上也保存了id
-        //                         guid: handler.guid
-        //                     }
-        //                 ]
-        //             },
-        //             handle: f( e )
-        //         }
-        //     }
-        // }
-        zQuery.event = {
-            // 1.创建缓存对象 与 dom对象建立映射（通过添加expando属性）
-            // 2.addEventListener
-            // 3.将监听的事件派发
-            // @params: types -> 'string' 支持绑定多个事件
-            add: function (elem, types, handle) {
-                var handleObj,
-                    elemData = dataPriv.get(elem),
-                    type,
-                    t;
+    // var init = {
+    //     elem: {
+    //         jQuery351046541611:{
+    //             events: {
+    //                 // 'click'
+    //                 handlers: [
+    //                     handleObj: {
+    //                         type: type, // 填充类型
+    //                         // fn
+    //                         handler: f(),
+    //                         // handler.guid fn上也保存了id
+    //                         guid: handler.guid
+    //                     }
+    //                 ]
+    //             },
+    //             handle: f( e )
+    //         }
+    //     }
+    // }
+    zQuery.event = {
+        // 1.创建缓存对象 与 dom对象建立映射（通过添加expando属性）
+        // 2.addEventListener
+        // 3.将监听的事件派发
+        // @params: types -> 'string' 支持绑定多个事件
+        add: function (elem, types, handle) {
+            var handleObj,
+                elemData = dataPriv.get(elem),
+                type,
+                t;
 
-                if (!handle) {
-                    return;
-                }
-
-                if (!handle.guid) {
-                    handle.guid = jQuery.guid++;
-                }
-
-                // 创建events
-                if (!elemData.events) {
-                    elemData.events = {};
-                }
-
-                // 创建handle
-                if (!(eventHandle = elemData.handle)) {
-                    eventHandle = elemData.handle = function (e) {
-
-                        return zQuery.event.dispatch.apply( elem, arguments );
-                    };
-
-                    types = ( types || '').split(' ');
-                    t = types.length;
-
-                    while (t--) {
-
-                        type = types[t] || '';
-                        // 创建存放数据的数组
-
-                        if (!type) {
-                            continue;
-                        }
-
-                        elemData.events[type] = [];
-
-                        if (elem.addEventListener) {
-                            elem.addEventListener(type, eventHandle);
-                        }
-
-
-                        // 创建数组中要存放的事件相关信息
-                        handleObj = {
-                            type: type,
-                            handler: handle,
-                            guid: handle.guid
-                        };
-
-                        // 数据压入数组
-                        elemData.events[type].push(handleObj);
-                    }
-                }
-            },
-
-            dispatch: function ( nativeEvent ) {
-                var ret,
-                    i,
-                    matched,
-                    // 这里先不做修正
-                    handlers = (
-                        dataPriv.get( this, "events" ) || Object.create(null)
-                    )[nativeEvent.type]  || [];
-
-                i = 0;
-
-                while( (matched = handlers[i++]) ) {
-
-                    // 执行handler,改变this
-                    ret = matched.handler.apply( nativeEvent.type, arguments);
-                }
-
-                return ret;
+            if (!handle) {
+                return;
             }
-        };
 
-        window.$ = zQuery;
-    })(window);
-    
-    $('.a').on('click', function () {
-        console.log('la');
-    })
+            if (!handle.guid) {
+                handle.guid = jQuery.guid++;
+            }
+
+            // 创建events
+            if (!elemData.events) {
+                elemData.events = {};
+            }
+
+            // 创建handle
+            if (!(eventHandle = elemData.handle)) {
+                eventHandle = elemData.handle = function (e) {
+
+                    return zQuery.event.dispatch.apply( elem, arguments );
+                };
+            }
+
+            types = ( types || '').split(' ');
+            t = types.length;
+
+            while (t--) {
+
+                type = types[t] || '';
+                // 创建存放数据的数组
+
+                if (!type) {
+                    continue;
+                }
+
+                elemData.events[type] = elemData.events[type] || [];
+
+                if (elem.addEventListener) {
+                    elem.addEventListener(type, eventHandle);
+                }
+
+
+                // 创建数组中要存放的事件相关信息
+                handleObj = {
+                    type: type,
+                    handler: handle,
+                    guid: handle.guid
+                };
+
+                // 数据压入数组
+                elemData.events[type].push(handleObj);
+            }            
+        },
+
+        dispatch: function ( nativeEvent ) {
+            var ret,
+                i,
+                matched,
+                // 这里先不做修正
+                handlers = (
+                    dataPriv.get( this, "events" ) || Object.create(null)
+                )[nativeEvent.type]  || [];
+
+            i = 0;
+
+            while( (matched = handlers[i++]) ) {
+
+                // 执行handler,改变this
+                ret = matched.handler.apply( nativeEvent.type, arguments);
+            }
+
+            return ret;
+        }
+    };
+
+    window.$ = zQuery;
+})(window);
+
+$('.a').on('click', function () {
+    console.log('la');
+})
 ```
 
 就这样初步完成了一个简易的事件绑定，目前只支持多个元素绑定多个事件，而且开辟了缓存系统。

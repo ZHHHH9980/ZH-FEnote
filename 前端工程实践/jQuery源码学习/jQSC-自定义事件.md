@@ -217,3 +217,395 @@ addEventListener(type, eventHandle) 浏览器的原生事件由`addEventListener
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200805114319379.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
 
 `trigger on`本身核心的东西其实并不多，但是有太多的兼容和包装处理，甚至模拟了事件冒泡，所以看起来真的非常非常费劲。
+
+
+
+## 实现trigger
+
+弄明白核心原理，接下来就着手实现一个简易的trigger，能够实现的功能包括传递参数和触发自定义事件。这里暂时不对事件对象进行包装。
+
+```javascript
+//接口 
+zQuery.fn.extend({
+     trigger: function (type, data) {
+         this.each(function () {
+             zQuery.event.trigger(this, type, data);
+         })
+     }
+ })
+```
+
+原生事件都会传入一个事件对象作为第一个参数，这里为了参数对齐，也模拟传一个简单的对象。
+
+```javascript
+trigger: function (elem, type, data) {
+    var handle = dataPriv.get( elem ) && dataPriv.get( elem ).handle,
+        event = {};
+    
+    // 模拟事件对象，jQuery实际上在这里做了包装
+    event.type = type;
+    data = [ event ].concat( data );
+
+    if (handle) {
+        handle.apply(elem, data);
+    }
+}
+```
+
+做个简单的测试
+
+```html
+<body>
+    <div class="a"></div>
+	<div class="a"></div>
+    <script>
+        $('.a').on('click', function (e, data1, data2) {
+            console.log(e ,data1, data2)
+        });
+
+        $('.a').trigger('click',['1', '2'])
+    </script>
+</body>
+
+```
+
+前面是trigger触发的，后面是我手点击的。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2020080515022472.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
+
+其实在这也能更好理解jQuery的处理，自定义事件就通过缓存获取handle，原生事件就通过`addEventListener`。，这么做的好处之一就是非常非常非常方便，自定义事件和原生事件都可以通过`on trigger`解决，而且自定义事件传参也非常方便！
+
+这里已经能看出缓存系统的好处了，但是好处绝对不止这些，事件不光能添加，还得能删去，下篇再来探索。
+
+
+
+贴上升级的zQuery作为结尾-新增trigger-on自定义事件。
+
+```javascript
+/* zQuery! */
+    (function (window) {
+        var zQuery = function (selector, context) {
+            return new zQuery.fn.init(selector, context);
+        },
+            isFlatObj = function (obj) {
+                if (typeof obj === 'object') {
+                    for (var i in obj) {
+                        if (typeof obj[i] === 'object') {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            };
+
+        zQuery.each = function (obj, callback, args) {
+            var length, i = 0;
+
+            // 如果是数组或者类数组
+            if ( isArrayLike( obj ) ) {
+                length = obj.length;
+                for ( ; i < length; i++ ) {
+                    // 调用callback 传入obj的每一项属性值item 以及索引index
+                    if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
+                        // if return false 就终止循环
+                        break;
+                    }
+                }
+            } else {
+                // 对象就for in 循环
+                for ( i in obj ) {
+                    if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
+                        break;
+                    }
+                }
+            }
+
+            return obj;
+        }
+
+        zQuery.fn = zQuery.prototype = {
+            constructor: zQuery
+        };
+
+        // 1. $.fn.extend({}) 扩展jQuery本身
+        // 2. $.fn.extend(true, {}, {}) 深拷贝
+        // 3. $.fn.extend({}, {}) 浅拷贝
+        zQuery.extend = zQuery.fn.extend = function () {
+            var length = arguments.length,
+                i = 1,
+                options,
+                name,
+                copy,
+                deep = false,
+                target = arguments[0];
+
+            if (typeof target === 'boolean') {
+                deep = target;
+
+                target = arguments[i];
+                i++;
+            }
+
+            if (typeof target !== 'object') {
+                target = {};
+            }
+
+            // 扩展$.fn/$
+            if (i === length) {
+                target = this;
+                i--;
+            }
+
+            for (; i < length; i++) {
+                // 遍历传入的每一个对象
+                if ( (options = arguments[i]) !== null) {
+
+                    // 遍历传入对象的每一个属性
+                    // 这里以options的属性为主导，添加/覆盖target上的属性
+                    for (name in options) {
+                        // 被拷贝的属性值
+                        copy = options[ name ];
+
+                        if (target === copy) {
+                            continue;
+                        }
+
+                        // 拷贝和被拷贝值都得是对象才进入深拷贝
+                        if (deep && copy && (!isFlatObj(copy) && !isFlatObj(target[ name ]) )) {
+                            target[ name ] = zQuery.extend(deep, target[ name ], copy);
+                        } else if (copy != undefined) {
+                            target[ name ] = copy;
+                        }
+                    }
+                }
+            }
+            // 返回深拷贝结束的target[ name ]
+            return target;
+        }
+
+        var init = zQuery.fn.init = function (selector, context) {
+            var match = [],
+                nodeList,
+                i = 0;
+
+            context = context || document;
+
+            // $() 相当于调用原型方法
+            if (!selector) {
+                return this;
+            }
+
+            if (selector === document) {
+                this[i] = document;
+            }
+
+            if (typeof selector === 'string') {
+
+                // .class #id
+                if (selector[0] === ('.' || '#') ) {
+                    nodeList = context.querySelectorAll(selector);
+                }
+
+                while ( nodeList[i] ) {
+                    this[i] = nodeList[i];
+                    i++;
+                }
+
+                this['length'] = i;
+                return this;
+            }
+
+
+        },
+            isArrayLike =  function (obj) {
+            var length = obj.length;
+
+            if (!obj || !('length' in obj)) {
+                return false;
+            }
+
+            return Array.isArray(obj) || !!(typeof obj === 'object' && obj[length - 1]);
+
+        };
+
+        init.prototype = zQuery.fn;
+
+        zQuery.fn.extend({
+            each: function (callback, args) {
+                zQuery.each(this, callback, args);
+            },
+            on: function (types, selector, fn) {
+                return on(this, types, selector, fn);
+            },
+            trigger: function (type, data) {
+                this.each(function () {
+                    zQuery.event.trigger(this, type, data);
+                })
+            }
+        })
+
+        function on (elem, types, selector, fn) {
+            // (types, fn)
+            if (!fn) {
+                fn = selector;
+            }
+
+            // (types, selector, fn)
+
+
+            // add(elem, type, handle, selector)
+            // 支持多个对象绑定事件
+            return elem.each( function () {
+                zQuery.event.add( this, types, fn, selector)
+            })
+        }
+
+
+        zQuery.guid = 1;
+        zQuery.expando =  "zQuery" + ( '' +  Math.random() ).replace( /\D/g, "" );
+
+        function Data() {
+            this.expando = zQuery.expando + Data.uid++;
+        }
+
+        Data.uid = 1;
+
+        Data.prototype = {
+            cache: function ( owner ) {
+                var value = owner[ this.expando ];
+
+                if (!value) {
+                    value = {};
+
+                    if (owner.nodeType) {
+                        owner[ this.expando ] = value;
+                    }
+                }
+
+                return value;
+            },
+            get: function ( owner, key) {
+                return key === undefined ? this.cache( owner ) : owner[ this.expando ] && owner[ this.expando ][ key ];
+            }
+        };
+
+        var dataPriv = new Data();
+
+        // var init = {
+        //     elem: {
+        //         jQuery351046541611:{
+        //             events: {
+        //                 // 'click'
+        //                 handlers: [
+        //                     handleObj: {
+        //                         type: type, // 填充类型
+        //                         // fn
+        //                         handler: f(),
+        //                         // handler.guid fn上也保存了id
+        //                         guid: handler.guid
+        //                     }
+        //                 ]
+        //             },
+        //             handle: f( e )
+        //         }
+        //     }
+        // }
+        zQuery.event = {
+            // 1.创建缓存对象 与 dom对象建立映射（通过添加expando属性）
+            // 2.addEventListener
+            // 3.将监听的事件派发
+            // @params: types -> 'string' 支持绑定多个事件
+            add: function (elem, types, handle) {
+                var handleObj,
+                    elemData = dataPriv.get(elem),
+                    type,
+                    t;
+
+                if (!handle) {
+                    return;
+                }
+
+                if (!handle.guid) {
+                    handle.guid = jQuery.guid++;
+                }
+
+                // 创建events
+                if (!elemData.events) {
+                    elemData.events = {};
+                }
+
+                // 创建handle
+                if (!(eventHandle = elemData.handle)) {
+                    eventHandle = elemData.handle = function (e) {
+
+                        return zQuery.event.dispatch.apply( elem, arguments );
+                    };
+                }    
+                types = ( types || '').split(' ');
+                t = types.length;
+
+                while (t--) {
+
+                    type = types[t] || '';
+                    // 创建存放数据的数组
+
+                    if (!type) {
+                        continue;
+                    }
+
+                    elemData.events[type] = elemData.events[type] || [];
+
+                    if (elem.addEventListener) {
+                        elem.addEventListener(type, eventHandle);
+                    }
+
+
+                    // 创建数组中要存放的事件相关信息
+                    handleObj = {
+                        type: type,
+                        handler: handle,
+                        guid: handle.guid
+                    };
+
+                    // 数据压入数组
+                    elemData.events[type].push(handleObj);
+                }
+            },
+
+            dispatch: function ( nativeEvent ) {
+                var ret,
+                    i,
+                    matched,
+                    // 这里先不做修正
+                    handlers = (
+                        dataPriv.get( this, "events" ) || Object.create(null)
+                    )[nativeEvent.type]  || [];
+
+                i = 0;
+
+                while( (matched = handlers[i++]) ) {
+
+                    // 执行handler,改变this
+                    ret = matched.handler.apply( nativeEvent.type, arguments);
+                }
+
+                return ret;
+            },
+
+            trigger: function (elem, type, data) {
+                var handle = dataPriv.get( elem ) && dataPriv.get( elem ).handle,
+                    event = {};
+
+                event.type = type;
+                data = [ event ].concat( data );
+
+                if (handle) {
+                    handle.apply(elem, data);
+                }
+            }
+        };
+
+        window.$ = zQuery;
+    })(window);
+```
+

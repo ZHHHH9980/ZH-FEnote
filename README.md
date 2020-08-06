@@ -30,6 +30,11 @@
 
 
 
+### 异步
+
+- [ajax](./JavaScript/异步/AJAX.md)
+- [get/post区别](./JavaScript/异步/get和post的区别.md)
+
 ### 正则表达式
 
 - [正则基础](./JavaScript/正则表达式/正则基础.md)
@@ -41,6 +46,8 @@
 ## Css
 
 -待更新
+
+
 
 ## 计算机网络
 
@@ -59,6 +66,7 @@
   - [jQSC-事件绑定-搭建框架](./前端工程实践/jQuery源码学习/jQSC-事件绑定-搭建框架.md)
   - [jQSC-jQuery.extend-为zQuery添加可扩展能力](./前端工程实践/jQuery源码学习/jQSC-jQuery.extend.md)
   - [jQSC-trigger-on实现自定义事件](./前端工程实践/jQuery源码学习/jQSC-自定义事件.md)
+  - [jQSC-off解绑事件](./前端工程实践/jQuery源码学习/jQSC-解绑事件.md)
 
 
 
@@ -67,3 +75,8 @@
 ### html + css
 
 - [html+css面试题](./前端面试/html+css面试题.md)
+
+
+
+
+
