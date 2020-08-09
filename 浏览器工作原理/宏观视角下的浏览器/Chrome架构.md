@@ -1,0 +1,65 @@
+# Chrome架构：仅仅打开了1个页面，为什么有多个进程？
+
+
+
+## 进程和线程
+
+多线程可以并行处理任务，但是**线程是不能单独存在的，它是由进程来启动和管理的**。那什么又是进程呢？
+
+**一个进程就是一个程序的运行实例**。详细解释就是，启动一个程序的时候，操作系统会为该程序创建一块内存，用来存放代码、运行中的数据和一个执行任务的主线程，我们把这样的一个运行环境叫**进程**。
+
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200808215433893.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
+
+
+
+### 进程与线程之间的关系
+
+**1.进程中任意线程执行出错，都会导致整个进程的崩溃。**
+
+**2.线程之间共享进程中的数据。**
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200809152222296.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
+
+
+
+**3.当一个进程关闭以后，操作系统会回收进程中所占用的内存。**
+
+**4.进程之间的内容相互隔离。**
+
+进程隔离是为保护操作系统中进程互不干扰的技术，每一个进程只能访问自己占有的数据，也就避免出现进程 A 写入数据到进程 B 的情况。正是因为进程之间的数据是严格隔离的，**所以一个进程如果崩溃了，或者挂起了，是不会影响到其他进程的**。如果进程之间需要进行数据的通信，这时候，就需要使用用于进程间通信（IPC）的机制了。
+
+
+
+### 单浏览器进程
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200809150638272.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
+
+所有浏览器都运行在单个进程中，导致不稳定、不安全、不流畅。
+
+1.不稳定
+
+因为插件也运行在进程中，所以一旦插件崩溃，会导致整个浏览器进程崩溃。
+
+2.不安全
+
+插件可以访问系统，恶意程序可能对系统造成破坏
+
+3.不流畅
+
+Javascript环境、页面渲染等都在一个线程中，一旦任何一个出现阻塞，就会影响整个进程的崩溃，也就导致浏览器崩溃。
+
+
+
+## 目前浏览器多进程架构
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200809151201998.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
+
+不同进程负责处理不同的服务，即使某个进程崩溃，也不会对其他进程造成影响。
+
+
+
+### 进程之间的通讯
+
+进程之间是各自独立，互不干扰的，如果直接需要数据通讯，需要使用IPC机制。

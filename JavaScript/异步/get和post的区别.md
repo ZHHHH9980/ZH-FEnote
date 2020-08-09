@@ -1,4 +1,4 @@
-# get/post
+# AJAX请求过程
 
 ==//=>1==创建AJAX实例
 
@@ -58,3 +58,38 @@ xhr.send([请求主体内容]);
 ​	get: 从服务器端获取数据（给的少，拿的多）
 
 ​	post: 向服务器端推送数据（给的多，拿得少）
+
+​	delete: 删除服务器端的某些内容
+
+​	put: 向服务器上存放一些内容
+
+​	head:只获取服务器返回的**响应头信息**
+
+​	options: 一般使用它向服务器发送一个探测性请求，如果服务器端返回了信息，说明当前客户端和服务器端建立了连接，可以继续发送其他请求。
+
+​	trace: 与options功能类似，回显服务器收到的请求，用于测试或诊断。但是**axios**这个ajax类库基于cross domain进行跨域请求的时候，就是先发送options请求进行探测尝试。如果能连通服务器才会继续发送其他请求。
+
+
+
+# GET / POST
+
+向服务器传递信息的方式不同
+
+[get]: 基于url地址“问号传参”的方式把信息传递给服务器。
+[post]: 基于“请求主体”的方式把信息传递给服务器。
+
+
+
+[get]
+
+```javascript
+let xhr = new XMLHttpRequest();
+xhr.open('get', 'https://www.baidu.com/index.html?id=10');
+xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4 $$ xhr.status === 200) {
+        console.log(JSON.parse(xhr.responseText))
+    }
+}
+xhr.send(null)
+```
+
