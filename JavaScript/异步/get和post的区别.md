@@ -73,23 +73,45 @@ xhr.send([请求主体内容]);
 
 # GET / POST
 
-向服务器传递信息的方式不同
+**向服务器传递信息的方式不同**
 
 [get]: 基于url地址“问号传参”的方式把信息传递给服务器。
 [post]: 基于“请求主体”的方式把信息传递给服务器。
 
 
 
+```js
 [get]
+	xhr.open('get', 'https://www.baidu.com/index.html?id=10&max=10');
+	
+[post]	
+xhr.send(JSON.stringify({id: 10, max: 10}))
+```
 
-```javascript
-let xhr = new XMLHttpRequest();
-xhr.open('get', 'https://www.baidu.com/index.html?id=10');
-xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4 $$ xhr.status === 200) {
-        console.log(JSON.parse(xhr.responseText))
-    }
-}
-xhr.send(null)
+get请求一般用于向服务器获取数据，而post主要向服务器传递数据。如果post基于url?传参的方式会有问题：url拼接过长，**浏览器对url的长度有最大限度**(chrome 8kb IE 2kb ...)，超过的部分就会被截断。
+
+因此get请求基于url传参，post通过请求主体传递（请求主体理论上是没有限制的）
+
+
+
+**post相对get比较安全**
+
+​	因为get是基于“问号传参”把信息传递给服务器，容易被恶意劫持。post基于请求主体传递的，相对来说不易被劫持。因此登录、注册等设计安全性的交互操作，我们都应该用Post请求。
+
+
+
+**get会产生不可控的缓存**
+
+​	浏览器会自主记忆get产生的缓存，无法基于JS控制，真实项目中会把这个缓存清除掉。
+
+​	get请求产生缓存是因为：连续多次向相同地址（并且传递的问号参数信息也是相同的）发送请求，浏览器会将之前获取的数据从缓存中返回，导致客户端无法获取服务器最新的数据。
+
+
+
+解决方案：
+
+```js
+xhr.open('get', `dist/index?id=10&_={Math.random()}`)
+//=> 保证每次的请求地址不完全一致：在每一次请求的末尾追加一个随机数即可（使用_避免与其他属性名冲突）
 ```
 

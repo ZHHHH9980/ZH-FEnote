@@ -50,7 +50,7 @@ if ( elem.addEventListener ) {
 }
 ```
 
-从这里可以知道，`click`还是由**document**触发的，想一想原生JS的事件代理的形式？
+从这里可以知道，`click`还是由**document**触发的。
 
 
 
@@ -67,119 +67,40 @@ this指向被代理的对象。
 
 
 
-#### 原生JS事件代理
+3.由a嵌套b,点击b以后谁先触发？
 
-```javascript
-$(document).addEventListener('click', function (e) {
-    if (e.target.nodeName.toLowerCase() !== 'div') return;
-    //..
-})
+```html
+<body>
+    <div class="a">
+        <p class="b">aa</p>
+    </div>
+    <script>
+        $(document).on('click', function (e) {
+            console.log(3);
+        });
+        $(document).on('click','.a', function (e) {
+            console.log(2);
+        });
+        $(document).on('click','.b', function (e) {
+            console.log(1);
+        });
+    </script>
+</body>   
 ```
 
-原生JS事件代理也是利用了事件冒泡，将其他不需要代理的元素全部阻止，仅有div标签能冒泡到document上，除了给document绑定事件，还有一个要求就是获取div。
+打印结果是1，2，3，也就是从最内层开始冒泡，jQuery内部是如何实现的？
 
 
 
-`event.add`将被代理对象保存到expando中
+## 装载队列
 
-```javascript
-// handleObj is passed to all event handlers
-handleObj = jQuery.extend( {
-    type: type,
-    origType: origType,
-    data: data,
-    handler: handler,
-    guid: handler.guid,
-    selector: selector, //<==
-    needsContext: selector && jQuery.expr.match.needsContext.test( selector ),
-    namespace: namespaces.join( "." )
-}, handleObjIn );
-```
-
-
-
-剩下就是触发`event.dispatch`了。
-
-`event.dispatch`有个非常关键的步骤
+`event.dispatch`有个非常关键的步骤-装载队列
 
 ```javascript
 handlerQueue = jQuery.event.handlers.call( this, event, handlers );
 ```
 
-打印结果：![在这里插入图片描述](https://img-blog.csdnimg.cn/20200807101529899.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
-
-可以明显发现，`event.handlers` 把事件和被代理对象包装在一起放入事件队列。
-
-
-
-继续探索`event.handlers`
-
-```javascript
-handlers: function( event, handlers ) {
-		// this: dom对象
-		// event 经过jQuery修正后的事件对象
-		// handlers:
-        //	0: {type: "click", origType: "click", data: undefined, guid: 1, handler: ƒ, …}
-        // delegateCount: 1 代理计数
-        // cur: 出发当前事件的elem元素节点
-
-        var i, handleObj, sel, matchedHandlers, matchedSelectors,
-			handlerQueue = [],
-			delegateCount = handlers.delegateCount,
-			cur = event.target;
-    
-    
-```
-
-经过一堆测试，从变量和参数基本上就能看出端倪，`cur`是触发当前事件的元素，也就是被代理的元素。`delegateCount`是它被代理的次数。
-
-```javascript
-//...
-for ( i = 0; i < delegateCount; i++ ) {
-    handleObj = handlers[ i ];
-}
-if ( matchedSelectors[ sel ] ) {
-    matchedHandlers.push( handleObj );
-}
-if ( matchedHandlers.length ) {
-    handlerQueue.push( { elem: cur, handlers: matchedHandlers } );
-}
-```
-
-这里可以发现matchedHandlers是一个数组，**用于放一个对象被代理的多个事件**，我怎么知道的？
-
-我打印的！
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20200807104031690.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
-
-
-
-### 阻止冒泡
-
-`event.handlers`不仅仅是把要执行的任务放入那么简单。
-
-`event.dispatch`中有一句注释非常关键
-
-> run the delegates first!
-
-为什么要先执行代理的事件？因为可能存在**阻止冒泡**的情况！
-
-```javascript
-$(document).on('click', function (e) {
-    console.log(2);
-});
-$(document).on('click','.a', function (e) {
-    console.log(1);
-    e.stopPropagation(); // 在这里阻止冒泡
-});
-// => 1
-```
-
-打印一下事件队列
-
-无论怎么执行on，被代理的事件永远是在队首的。
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20200807113812626.png)
+这个队列装载机制让代理事件先执行，事件的优先顺序是节点越深，越先执行，实际上就是模拟**冒泡机制**。
 
 
 
@@ -188,41 +109,16 @@ $(document).on('click','.a', function (e) {
 ```javascript
 // handlerQueue = jQuery.event.handlers.call( this, event, handlers );
 handlers: function( event, handlers ) {
-    // this: dom对象
-    // event 经过jQuery修正后的事件对象
-    // handlers:
-    //	[ 0: {type: "click", origType: "click", data: undefined, guid: 1, handler: ƒ, …}]
-    // delegateCount: 1 当前元素代理的事件个数
-    // cur: 触发当前事件的elem元素节点
-
     var i, handleObj, sel, matchedHandlers, matchedSelectors,
         handlerQueue = [],
         delegateCount = handlers.delegateCount,
         cur = event.target;
 
-
     // Find delegate handlers
-    // 处理事件代理
-    if ( delegateCount &&
-
-        // Support: IE <=9
-        // Black-hole SVG <use> instance trees (trac-13180)
-        cur.nodeType &&
-
-        // Support: Firefox <=42
-        // Suppress spec-violating clicks indicating a non-primary pointer button (trac-3861)
-        // https://www.w3.org/TR/DOM-Level-3-Events/#event-type-click
-        // Support: IE 11 only
-        // ...but not arrow key "clicks" of radio inputs, which can have `button` -1 (gh-2343)
+    if ( delegateCount && cur.nodeType &&
         !( event.type === "click" && event.button >= 1 ) ) {
-
-        // 向上查找，直到没有父亲节点
-        // cur 是触发事件的子对象，一直向上查找
-        // 找到代理的对象位置 cur = cur.parentNode || this 注意这里只是给个容错机制
         for ( ; cur !== this; cur = cur.parentNode || this ) {
 
-            // Don't check non-elements (#13208)
-            // Don't process clicks on disabled elements (#6911, #8165, #11382, #11764)
             // 找到一个元素节点
             if ( cur.nodeType === 1 && !( event.type === "click" && cur.disabled === true ) ) {
                 matchedHandlers = [];
@@ -231,19 +127,7 @@ handlers: function( event, handlers ) {
                 // 遍历每个代理的事件
                 for ( i = 0; i < delegateCount; i++ ) {
                     handleObj = handlers[ i ];
-                    // handlers:{
-                    // 0:,
-                    // data: undefined,
-                    // guid: 1,
-                    // handler: ƒ (e),
-                    // namespace: "",
-                    // needsContext: false,
-                    // origType: "click",
-                    // selector: ".a",
-                    // type: "click",
-                    // }
-
-                    // Don't conflict with Object.prototype properties (#13203)
+                    
                     // 抽出里面的被代理对象
                     sel = handleObj.selector + " ";
 
@@ -252,13 +136,9 @@ handlers: function( event, handlers ) {
                         matchedSelectors[ sel ] = handleObj.needsContext ?
                             jQuery( sel, this ).index( cur ) > -1 :
                         jQuery.find( sel, this, null, [ cur ] ).length;
-
-                        // jQuery.find( sel, this, null, [ cur ] )
-                        // 比如有三个div.a，这里找到触发事件的那个
-                        // => [div.a]
                     }
 
-                    // matchedSelectors: {".a ": 1} 存在就把handleObj压入数组,这就是我们要处理的事件
+                    // matchedSelectors: {".a ": 1} 存在就把handleObj压入数组,这就是委托的事件
                     if ( matchedSelectors[ sel ] ) {
                         // handleObj
                         // {type: "click", origType: "click", data: undefined, guid: 1, handler: ƒ, …}
@@ -296,25 +176,52 @@ handlers: function( event, handlers ) {
 }
 ```
 
+这段代码主要有两个关键点
+
+- 事件缓存的结构
+- 向上查找代理事件
 
 
-### 前置知识
 
-$(el).on(fn) 每次事件绑定都会产生一个handlers放入缓存中，这个handlers存放的是绑定事件以及相关信息。
+### 事件缓存
+
+$(el).on(type, **selector**, fn) 每次事件绑定都会产生一个handlers放入缓存中，这个handlers存放的是绑定事件以及相关信息。
+
+这里再来看下dataPriv的缓存设计，()中是作为参数传入的名称。
 
 ```javascript
-0:{
-    data: undefined
-    guid: 1
-    handler: ƒ (e)
-    namespace: ""
-    needsContext: false
-    origType: "click"
-    selector: ".a"
-    type: "click"
-    __proto__: Object
+dataPriv = {
+    events: {
+        click(handlers):[
+        	0(handleObj):{
+                data: undefined
+                guid: 1
+                handler: fn
+                namespace: ""
+                needsContext: false
+                origType: "click"
+                selector: ".a" //<= 被代理的对象
+                type: "click"
+                __proto__: Object
+			},
+    		...,
+    		delegateCount: 1
+        ]
+    },
+    handle: function( e ) {
+        return typeof jQuery !== "undefined" && jQuery.event.triggered !== e.type ?
+            jQuery.event.dispatch.apply( elem, arguments ) : undefined;
+    };
 }
 ```
+
+这个缓存设计真的太美妙了！
+
+通过之前的学习我们知道，jQuery会使用`addEventListener`监听缓存对象中的`handle`这个方法。
+
+接下来触发`handle`方法，再触发`dispatch`
+
+`dispatch`从缓存中取出`handlers`
 
 而它也会作为`events.handlers`的一个参数
 
@@ -323,6 +230,8 @@ handlers: function( event, handlers )
 ```
 
 event是传入的事件对象。
+
+这样来看`events.handlers`就非常清晰了。
 
 
 
@@ -335,7 +244,9 @@ event是传入的事件对象。
 
 ### 代理的事件优先入队
 
-遇到的问题:this指向的问题
+遇到的问题:
+
+1.this指向的问题
 
 ```javascript
 $(el).on(type, selector, function() {
@@ -345,6 +256,18 @@ $(el).on(type, selector, function() {
 
 this指向的是selector,而传入的handlers刚好有selector，保存了这个对象选择方式的**字符串**。这就会带来一个问题，如果有多个`<div class='a'></div>`，如何辨别是哪一个？
 
+
+
+2.之前提过的事件优先级问题,如何做到触发b的代理事件再触发a？	
+
+```html
+<div class="a">
+    <p class="b">aa</p>
+</div>
+```
+
+
+
 来看看jQuery的处理
 
 ```javascript
@@ -352,6 +275,8 @@ var cur = event.target; // 先获取触发事件的对象
 ```
 
 
+
+这里以触发p标签为例。
 
 ```javascript
 if ( delegateCount && cur.nodeType && !( event.type === "click" && event.button >= 1 ) ) {
@@ -368,18 +293,15 @@ if ( delegateCount && cur.nodeType && !( event.type === "click" && event.button 
             for ( i = 0; i < delegateCount; i++ ) {
                 handleObj = handlers[ i ];
                 
-	            // 抽出里面的被代理对象选择字符串 '.a'
+	            // 抽出里面的被代理对象选择字符串 '.b'
                 sel = handleObj.selector + " ";
 
-                // 在这里找到触发事件的被代理对象
+                // 在这里确定上下文中能不能找到存放在handleObj.selector的元素对象
+                // 能找到说明就是这个节点需要委托处理
                 if ( matchedSelectors[ sel ] === undefined ) {
                     matchedSelectors[ sel ] = handleObj.needsContext ?
                         jQuery( sel, this ).index( cur ) > -1 :
                     jQuery.find( sel, this, null, [ cur ] ).length;
-
-                    // jQuery.find( sel, this, null, [ cur ] )
-                    // 比如有三个div.a，这里找到触发事件的那个
-                    // => [div.a]
                 }
 
                 // matchedSelectors: {".a ": 1} 存在就把handleObj压入数组,这就是我们要处理的事件
@@ -403,24 +325,57 @@ if ( delegateCount && cur.nodeType && !( event.type === "click" && event.button 
 
 
 
-大概逻辑就是这样，**触发的对象**向上查询到**代理对象**，代理对象可能代理多个，所以要找到缓存中匹配的那个。
+先看这行
 
-![image-20200807163010262](C:\Users\how浩\AppData\Roaming\Typora\typora-user-images\image-20200807163010262.png)
+```js
+for ( ; cur !== this; cur = cur.parentNode || this ) {
+```
+
+this指向的是谁？
+
+$(document).on(type, '.b', fn);	 this=> document这个dom节点
+
+也就是说我们点击p标签会一直向上查找直到匹配到**代理对象**为止，这么做实际上就是在模拟事件冒泡机制。
 
 
 
-```javascript
-// 在这里匹配
+如何找到哪些元素是需要冒泡执行的？
+
+```js
+// 抽出里面的被代理对象选择字符串 '.b'
+sel = handleObj.selector + " ";
+```
+
+这个handleObj就是我们之前提到的缓存，这个缓存里保留了被代理的对象信息，而且我们可以发现，一种事件只开辟**一个handleObj**。
+
+
+
+取出selector以后进行匹配，在这里确定上下文中能不能找到存放在handleObj.selector的元素对象，能找到说明就是这个节点需要委托处理执行函数。
+
+```js
 if ( matchedSelectors[ sel ] === undefined ) {
+    console.log(sel);
+    console.log(cur);
     matchedSelectors[ sel ] = handleObj.needsContext ?
         jQuery( sel, this ).index( cur ) > -1 :
     jQuery.find( sel, this, null, [ cur ] ).length;
-    
-    // jQuery.find( sel, this, null, [ cur ] )
-    // 比如有三个div.a，这里找到触发事件的那个
-    // => [div.a]
+    console.log(matchedSelectors);
 }
+```
 
+打印一下更加清晰。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200810104733922.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
+
+为什么这么麻烦一直向上遍历查找？直接使用cur不就行了？
+
+主要是因为`<div class="a">`这个标签里面**可能还有元素被“点击”**，然后向上冒泡而不一定是“直接点击"这个标签。
+
+
+
+一旦匹配成功，就把handleObj压入数组。
+
+```javascript
 // matchedSelectors: {".a ": 1} 存在就把handleObj压入数组,这就是我们要处理的事件所在的对象
 if ( matchedSelectors[ sel ] ) {
     // handleObj
@@ -429,9 +384,843 @@ if ( matchedSelectors[ sel ] ) {
 }
 ```
 
-一旦匹配成功，就把对象压入数组。
-
-代理事件解决。
 
 
+剩下的就是元素自身绑定的事件,$(document).on(type, fn)
+
+```js
+cur = this;
+
+// 如果绑定的事件超过了代理事件的个数
+// 说明还有绑定自身的事件，这个时候再压入队列
+if ( delegateCount < handlers.length ) {
+    // 这里就体现出delegateCount的强大之处！
+    // delegateCount的值也是直接绑定事件的索引值！
+    handlerQueue.push( { elem: cur, handlers: handlers.slice( delegateCount ) } );
+}
+
+return handlerQueue;
+```
+
+
+
+
+
+## 事件缓存体系概览
+
+用一张图梳理一下缓存跟事件处理的关系。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200810100549238.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
+
+
+
+理清楚关系就动手吧！
+
+
+
+## 简易实现事件代理功能
+
+### 完善事件缓存
+
+之前的缓存都做的很粗糙，因为没考虑事件代理。
+
+```js
+zQuery.event = {
+    zQuery.event = {
+    // 1.创建缓存对象 与 dom对象建立映射（通过添加expando属性）
+    // 2.addEventListener
+    // 3.将监听的事件派发
+    // @params: types -> 'string' 支持绑定多个事件
+    add: function (elem, types, handle, selector) {
+        var handleObj,
+            elemData = dataPriv.get(elem),
+            type,
+            t;
+        if (!handle) {
+            return;
+        }
+
+        if (!handle.guid) {
+            handle.guid = jQuery.guid++;
+        }
+
+        // 创建events
+        if (!elemData.events) {
+            elemData.events = {};
+        }
+
+        // 创建handle
+        if (!(eventHandle = elemData.handle)) {
+            eventHandle = elemData.handle = function (e) {
+
+                return zQuery.event.dispatch.apply(elem, arguments);
+            };
+        }
+
+        types = (types || '').split(' ');
+        t = types.length;
+
+        while (t--) {
+
+            type = types[t] || '';
+            // 创建存放数据的数组
+
+            if (!type) {
+                continue;
+            }
+
+            // elemData.events[type] = elemData.events[type] || [];
+
+            //if (elem.addEventListener) {
+            //    elem.addEventListener(type, eventHandle);
+            //}
+            if (! ( handlers = elemData.events[type] )) {
+                // 初始化events
+                handlers = elemData.events[type] = [];
+                handlers.delegateCount = 0;
+
+                if (elem.addEventListener) {
+                    elem.addEventListener(type, eventHandle);
+                }
+            }
+
+
+            // 创建数组中要存放的事件相关信息
+            // handleObj = {
+            //     type: type,
+            //     handler: handle,
+            //     guid: handle.guid
+            // };
+            
+            handleObj = {
+                type: type,
+                handler: handle,
+                guid: handle.guid,
+                selector: selector // 添加被代理对象
+            };
+
+            // 数据压入数组
+            // elemData.events[type].push(handleObj);
+            if (selector) {
+                // 保证代理事件永远处于最前的位置
+                handlers.splice(handlers.delegateCount++, 0, handleObj);
+            } else {
+                handlers.push(handleObj);
+            }
+        }
+    },
+```
+
+
+
+### 完善dispatch
+
+#### 1.实现队列装载
+
+我们需要什么
+
+1. 事件对象中的event.target，也就是触发事件的目标对象，作为向上遍历的起点
+2. 缓存中的handleObj,用里面存放的selector进行匹配
+
+返回一个代理事件优先的事件队列。
+
+事件队列的结构：
+
+```js
+// elem是触发当前事件的对象，handlers存放handleObj，里面有传入的方法等
+[
+    0: { elem: cur, handlers: [0: handleObj...] }
+]
+```
+
+再画一个示意图
+
+![image-20200811140336292](C:\Users\how浩\AppData\Roaming\Typora\typora-user-images\image-20200811140336292.png)
+
+
+
+
+
+
+
+### event.handlers
+
+```js
+handlers: function (event, handlers) {
+    var i,
+        cur,
+        sel,
+        handleQueue = [],
+        handleObj,
+        isMatched,
+        matchHandler,
+        delegateCount = handlers.delegateCount;
+
+    cur = event.target;
+
+    if (delegateCount && cur.nodeType) {
+
+        // 向上遍历每个元素节点
+        for (; cur !== this; cur = cur.parentNode || this) {
+
+            if (cur.nodeType === 1) {
+                matchHandler = [];
+
+                for (i = 0; i < delegateCount; i++) {
+                    handleObj = handlers[i];
+                    sel = handleObj.selector;
+                    isMatched = zQuery.matchElement(cur, sel);
+
+                    if (isMatched) {
+                        matchHandler.push(handleObj);
+                    }
+                }
+
+                // 每匹配完一个就先装载事件，保证顺序
+                if (matchHandler.length) {
+                    handleQueue.push({elem: cur, handlers: matchHandler});
+                }
+            }
+        }
+    }
+
+    // 开始处理元素本身绑定的事件
+    cur = this;
+    if (handlers.length > delegateCount) {
+        handleQueue.push({elem: cur, handlers: handlers.slice(delegateCount)})
+    }
+    return handleQueue;
+}
+```
+
+
+
+这里改写了一个zQuery.matchElement方法，因为jQuery.find实际上用了Sizzle...，我们只需实现类似的功能即可，无非就是字符串匹配元素。
+
+
+
+### zQuery.matchElement
+
+这里只暴力地认为两个元素的类名相等即为匹配成功。
+
+```js
+matchElement = function (node, string) {
+    let elClassName = (node || {}).className;
+
+    string = string ? string.substr(1) : '';
+
+    return elClassName === string;
+};
+```
+
+
+
+### event.dispatch
+
+这里要注意之前提过的this指向问题，从队列里提取之前保存好的elem。
+
+```js
+dispatch: function (nativeEvent) {
+    var ret,
+        i,
+        j,
+        matched,
+        handlerQueue,
+        handleObj,
+        // 这里先不做修正
+        handlers = (
+            dataPriv.get(this, "events") || Object.create(null)
+        )[nativeEvent.type] || [];
+
+    handlerQueue = zQuery.event.handlers.call(this, nativeEvent, handlers);
+
+    i = 0;
+
+    while ((matched = handlerQueue[i++])) {
+
+        for (j = 0; j < matched.handlers.length; j++) {
+            // 执行handler,改变this
+            handleObj = matched.handlers[j];
+            ret = handleObj.handler.apply(matched.elem, arguments);
+        }
+    }
+
+    return ret;
+}
+```
+
+可能会有点晕，再来看看handleQueue的构造就清晰多了。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2020081115182177.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70)
+
+设计的真是太美妙了，感叹一下。
+
+
+
+然而并没有结束，既然能够冒泡，就应该能阻止冒泡！当前的代码显然是无法阻止的，因为实际上事件都通过`addEventListener`监听，而监听者只有`document`。
+
+
+
+jQuery在`dispatch`这个方法里实际上对整个事件对象进行了改写，主要是因为不同浏览器事件对象获取方式不同。
+
+我们这里直接在改写一下`stopPropogation`即可，就不做兼容处理了。
+
+```js
+dispatch: function (nativeEvent) {
+    var ret,
+        i,
+        j,
+        matched,
+        handlerQueue,
+        handleObj,
+        // 这里先不做修正
+        handlers = (
+            dataPriv.get(this, "events") || Object.create(null)
+        )[nativeEvent.type] || [];
+
+    event = zQuery.event.fix(nativeEvent);
+
+    handlerQueue = zQuery.event.handlers.call(this, event, handlers);
+
+    i = 0;
+
+    while ((matched = handlerQueue[i++]) && !event.isPropagationStopped) {
+
+        for (j = 0; j < matched.handlers.length; j++) {
+            // 执行handler,改变this
+            handleObj = matched.handlers[j];
+            ret = handleObj.handler.apply(matched.elem, arguments);
+        }
+    }
+
+    return ret;
+}
+```
+
+
+
+### event.fix
+
+```js
+fix: function (nativeEvent) {
+    nativeEvent.stopPropagation = function () {
+        this.isPropagationStopped = true;
+    };
+    return nativeEvent;
+}
+```
+
+
+
+## 总结
+
+困扰我好久的事件机制总算有眉目了，这里贴上升级版的zQuery。
+
+```html
+<div class="a">
+    <div class="b">aa</div>
+</div>
+```
+
+
+
+```js
+/* zQuery! */
+(function (window) {
+    var zQuery = function (selector, context) {
+        return new zQuery.fn.init(selector, context);
+    },
+        isFlatObj = function (obj) {
+            if (typeof obj === 'object') {
+                for (var i in obj) {
+                    if (typeof obj[i] === 'object') {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        },
+        isEmptyObj = function (obj) {
+            for (var item in obj) {
+                return false;
+            }
+            return true;
+        },
+        matchElement = function (node, string) {
+            let elClassName = (node || {}).className;
+
+            string = string ? string.substr(1) : '';
+
+            return elClassName === string;
+        };
+
+    zQuery.FlatObj = isFlatObj;
+    zQuery.isEmptyObj = isEmptyObj;
+    zQuery.matchElement = matchElement;
+
+    zQuery.each = function (obj, callback, args) {
+        var length, i = 0;
+
+        // 如果是数组或者类数组
+        if (isArrayLike(obj)) {
+            length = obj.length;
+            for (; i < length; i++) {
+                // 调用callback 传入obj的每一项属性值item 以及索引index
+                if (callback.call(obj[i], i, obj[i]) === false) {
+                    // if return false 就终止循环
+                    break;
+                }
+            }
+        } else {
+            // 对象就for in 循环
+            for (i in obj) {
+                if (callback.call(obj[i], i, obj[i]) === false) {
+                    break;
+                }
+            }
+        }
+
+        return obj;
+    };
+
+    zQuery.fn = zQuery.prototype = {
+        constructor: zQuery
+    };
+
+    // 1. $.fn.extend({}) 扩展jQuery本身
+    // 2. $.fn.extend(true, {}, {}) 深拷贝
+    // 3. $.fn.extend({}, {}) 浅拷贝
+    zQuery.extend = zQuery.fn.extend = function () {
+        var length = arguments.length,
+            i = 1,
+            options,
+            name,
+            copy,
+            deep = false,
+            target = arguments[0];
+
+        if (typeof target === 'boolean') {
+            deep = target;
+
+            target = arguments[i];
+            i++;
+        }
+
+        if (typeof target !== 'object') {
+            target = {};
+        }
+
+        // 扩展$.fn/$
+        if (i === length) {
+            target = this;
+            i--;
+        }
+
+        for (; i < length; i++) {
+            // 遍历传入的每一个对象
+            if ((options = arguments[i]) !== null) {
+
+                // 遍历传入对象的每一个属性
+                // 这里以options的属性为主导，添加/覆盖target上的属性
+                for (name in options) {
+                    // 被拷贝的属性值
+                    copy = options[name];
+
+                    if (target === copy) {
+                        continue;
+                    }
+
+                    // 拷贝和被拷贝值都得是对象才进入深拷贝
+                    if (deep && copy && (!isFlatObj(copy) && !isFlatObj(target[name]))) {
+                        target[name] = zQuery.extend(deep, target[name], copy);
+                    } else if (copy != undefined) {
+                        target[name] = copy;
+                    }
+                }
+            }
+        }
+        // 返回深拷贝结束的target[ name ]
+        return target;
+    }
+
+    var init = zQuery.fn.init = function (selector, context) {
+        var match = [],
+            nodeList,
+            i = 0;
+
+        context = context || document;
+
+        // $() 相当于调用原型方法
+        if (!selector) {
+            return this;
+        }
+
+        if (selector === document) {
+            this[i] = document;
+        }
+
+        if (typeof selector === 'string') {
+
+            // .class #id
+            if (selector[0] === ('.' || '#')) {
+                nodeList = context.querySelectorAll(selector);
+            }
+
+            while (nodeList[i]) {
+                this[i] = nodeList[i];
+                i++;
+            }
+
+            this['length'] = i;
+            return this;
+        }
+
+
+    },
+        isArrayLike = function (obj) {
+            var length = obj.length;
+
+            if (!obj || !('length' in obj)) {
+                return false;
+            }
+
+            return Array.isArray(obj) || !!(typeof obj === 'object' && obj[length - 1]);
+
+        };
+
+    init.prototype = zQuery.fn;
+
+    zQuery.fn.extend({
+        each: function (callback, args) {
+            return zQuery.each(this, callback, args);
+        },
+        on: function (types, selector, fn) {
+            return on(this, types, selector, fn);
+        },
+        off: function (types, selector, fn) {
+
+            return this.each(function () {
+                zQuery.event.remove(this, types, selector, fn);
+            })
+        },
+        trigger: function (type, data) {
+            this.each(function () {
+                zQuery.event.trigger(this, type, data);
+            })
+        }
+    })
+
+    function on(elem, types, selector, fn) {
+        // (types, fn)
+        if (!fn) {
+            fn = selector;
+            selector = null;
+        }
+
+        // (types, selector, fn)
+
+
+        // add(elem, type, handle, selector)
+        // 支持多个对象绑定事件
+        return elem.each(function () {
+            zQuery.event.add(this, types, fn, selector)
+        })
+    }
+
+    /* 缓存模块开始 */
+    zQuery.guid = 1;
+    zQuery.expando = "zQuery" + ('' + Math.random()).replace(/\D/g, "");
+
+    function Data() {
+        this.expando = zQuery.expando + Data.uid++;
+    }
+
+    Data.uid = 1;
+
+    Data.prototype = {
+        cache: function (owner) {
+            var value = owner[this.expando];
+
+            if (!value) {
+                value = {};
+
+                if (owner.nodeType) {
+                    owner[this.expando] = value;
+                }
+            }
+
+            return value;
+        },
+        get: function (owner, key) {
+            return key === undefined ? this.cache(owner) : owner[this.expando] && owner[this.expando][key];
+        },
+        remove: function (owner, key) {
+            var i,
+                cache = owner[this.expando];
+
+            if (cache === undefined) {
+                return;
+            }
+
+            if (key !== undefined) {
+                // 'events' 直接使用 'events handle' 分割成数组
+                key = key in cache ?
+                    [key] :
+                (key.match(/[^ ]+/g) || []);
+                i = key.length;
+
+                while (i--) {
+                    delete cache[key[i]];
+                }
+
+
+                if (zQuery.isEmptyObj(cache)) {
+                    if (owner.nodeType) {
+                        delete owner[this.expando];
+                    }
+                }
+            }
+        }
+    };
+
+    var dataPriv = new Data();
+
+    /* 缓存模块结束 */
+
+    zQuery.event = {
+        // 1.创建缓存对象 与 dom对象建立映射（通过添加expando属性）
+        // 2.addEventListener
+        // 3.将监听的事件派发
+        // @params: types -> 'string' 支持绑定多个事件
+        add: function (elem, types, handle, selector) {
+            var handleObj,
+                elemData = dataPriv.get(elem),
+                handlers,
+                type,
+                t;
+
+            if (!handle) {
+                return;
+            }
+
+            if (!handle.guid) {
+                handle.guid = zQuery.guid++;
+            }
+
+            // 创建events
+            if (!elemData.events) {
+                elemData.events = {};
+
+            }
+
+            // 创建handle
+            if (!(eventHandle = elemData.handle)) {
+                eventHandle = elemData.handle = function (e) {
+
+                    return zQuery.event.dispatch.apply(elem, arguments);
+                };
+            }
+
+            types = (types || '').split(' ');
+            t = types.length;
+
+            while (t--) {
+
+                type = types[t] || '';
+                // 创建存放数据的数组
+
+                if (!type) {
+                    continue;
+                }
+
+
+                if (!(handlers = elemData.events[type])) {
+                    // 初始化events
+                    handlers = elemData.events[type] = [];
+                    handlers.delegateCount = 0;
+
+                    if (elem.addEventListener) {
+                        elem.addEventListener(type, eventHandle);
+                    }
+                }
+
+
+                // 创建数组中要存放的事件相关信息
+                // handleObj = {
+                //     type: type,
+                //     handler: handle,
+                //     guid: handle.guid
+                // };
+                handleObj = {
+                    type: type,
+                    handler: handle,
+                    guid: handle.guid,
+                    selector: selector
+                };
+
+                // 数据压入数组
+                if (selector) {
+                    handlers.splice(handlers.delegateCount++, 0, handleObj);
+                } else {
+                    handlers.push(handleObj);
+                }
+            }
+        },
+
+        // zQuery.event.off(this, types, selector, fn);
+        remove: function (elem, types, selector, fn) {
+
+            var i,
+                events,
+                t,
+                type,
+                handlers,
+                elemData = dataPriv.get(elem);
+
+            if (!fn) {
+                fn = selector;
+            }
+
+            if (!elemData || !(events = elemData.events)) {
+                return;
+            }
+
+            types = (types || '').match(/[^ ]+/g) || [''];
+            t = types.length;
+
+            while (t--) {
+                type = types[t];
+                handlers = events[type] || [];
+
+                j = handlers.length;
+                while (j--) {
+
+                    if ((fn && fn.guid === handlers[j].guid)) {
+                        handlers.splice(j, 1);
+
+                        if (zQuery.isEmptyObj(handlers)) {
+                            delete events[type];
+                        }
+                    }
+                }
+            }
+
+            if (zQuery.isEmptyObj(events)) {
+                dataPriv.remove(elem, 'handle events');
+            }
+        },
+
+        dispatch: function (nativeEvent) {
+            var ret,
+                i,
+                j,
+                matched,
+                handlerQueue,
+                handleObj,
+                // 这里先不做修正
+                handlers = (
+                    dataPriv.get(this, "events") || Object.create(null)
+                )[nativeEvent.type] || [];
+
+            event = zQuery.event.fix(nativeEvent);
+
+            handlerQueue = zQuery.event.handlers.call(this, event, handlers);
+
+            i = 0;
+
+            while ((matched = handlerQueue[i++]) && !event.isPropagationStopped) {
+
+                for (j = 0; j < matched.handlers.length; j++) {
+                    // 执行handler,改变this
+                    handleObj = matched.handlers[j];
+                    ret = handleObj.handler.apply(matched.elem, arguments);
+                }
+            }
+
+            return ret;
+        },
+
+        trigger: function (elem, type, data) {
+            var handle = dataPriv.get(elem) && dataPriv.get(elem).handle,
+                event = {};
+
+            console.log(handle);
+
+            event.type = type;
+            data = [event].concat(data);
+
+            if (handle) {
+                handle.apply(elem, data);
+            }
+        },
+
+        handlers: function (event, handlers) {
+            var i,
+                cur,
+                sel,
+                handleQueue = [],
+                handleObj,
+                isMatched,
+                matchHandler,
+                delegateCount = handlers.delegateCount;
+
+            cur = event.target;
+
+            if (delegateCount && cur.nodeType) {
+
+                // 向上遍历每个元素节点
+                for (; cur !== this; cur = cur.parentNode || this) {
+
+                    if (cur.nodeType === 1) {
+                        matchHandler = [];
+
+                        for (i = 0; i < delegateCount; i++) {
+                            handleObj = handlers[i];
+                            sel = handleObj.selector;
+                            isMatched = zQuery.matchElement(cur, sel);
+
+                            if (isMatched) {
+                                matchHandler.push(handleObj);
+                            }
+                        }
+
+                        // 每匹配完一个就先装载事件，保证顺序
+                        if (matchHandler.length) {
+                            handleQueue.push({elem: cur, handlers: matchHandler});
+                        }
+                    }
+                }
+            }
+
+            // 开始处理元素本身绑定的事件
+            cur = this;
+            if (handlers.length > delegateCount) {
+                handleQueue.push({elem: cur, handlers: handlers.slice(delegateCount)})
+            }
+            return handleQueue;
+        },
+
+        fix: function (nativeEvent) {
+            nativeEvent.stopPropagation = function () {
+                this.isPropagationStopped = true;
+            };
+            return nativeEvent;
+        }
+    };
+
+    window.$ = zQuery;
+})(window);
+
+
+$(document).on('click', function () {
+    console.log('3');
+});
+$(document).on('click', '.a', function (e) {
+    console.log('2');
+});
+$(document).on('click', '.b', function (e) {
+    console.log('1');
+    e.stopPropagation();
+});
+```
 
