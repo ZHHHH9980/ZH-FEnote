@@ -58,33 +58,36 @@
 
 ​					nodeType   	nodeName		nodeValue
 
-​	元素节点 		1			大写标签名			null
+​ 	 元素节点 		1			大写标签名			    null
 
-​	文本节点		 3			#text			  		文本内容
+​	文本节点		3			#text			  	文本内容
 
 ​	注释节点	 	8			#comment			注释内容
 
 ​	文档节点	 	9			#document			null
 
-
+<br>
 
 childNodes:所有子节点
 
 children:所有元素子节点（IE6~8会把所有注释当作元素子节点)
 
-parentNode
+parentNode: 父节点
 
-previousSibling
+previousSibling：上一个兄弟节点
 
-previousElementSibling(IE6~8不兼容)
+previousElementSibling(IE6~8不兼容) ： 上一个兄弟**元素**节点
 
-nextSibling
+nextSibling: 下一个兄弟节点
 
-firstChild
+nextElementSibling: 下一个兄弟**元素**节点
 
-lastChild
+firstChild： 第一个子节点
+
+lastChild：最后一个子节点
 
 
+<br>
 
 [动态操作DOM]
 
