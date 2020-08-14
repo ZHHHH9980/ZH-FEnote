@@ -12,20 +12,20 @@
 		- ID重复了会用第一个
 		- IE6~7中会把表单元素的name当作id使用
 
-​	
+​	<br>
 
 ​	getElementsByTagName
 
 ​		-> 获取当前上下文中所有子子孙孙标签名字为xxx的元素
 
 
-
+<br>
 ​	getElementsByClassName
 
 ​		**- 弊端：IE678下不兼容**
 
 
-
+<br>
 ​	getElementsByName
 
 ​		-> IE浏览器中只对表单元素的name起作用
@@ -33,7 +33,7 @@
 ​		-> 上下文只能是document
 
 
-
+<br>
 ​	querySelelctor
 
 ​	querySelectorAll
@@ -52,7 +52,7 @@
 
 
 
-
+<br>
 
 [描述节点和节点之间关系的属性]
 
@@ -582,68 +582,4 @@ let utils = (function () {
 
 
 
-
-# 跑马灯案例
-
-![image-20200618134922925](C:\Users\how浩\AppData\Roaming\Typora\typora-user-images\image-20200618134922925.png)
-
-原理：利用定时器控制left定位值
-
-将整个li复制一份到末尾
-
-一份li跑完瞬间回归原位
-
-
-
-克隆整个li的方法
-
-```javascript
-//1.
-let liEl = document.getElementsByTagName('li');
-let frg = document.createdocumentFragment();
-[].call(liEl,(item) => {
-    frg.appendChild(item.cloneNode(true));
-});
-liEl.appendChild(frg);
-frg = null;
-
-//2.
-liEl.innerHTML += liEl.innerHTML;
-```
-
-
-
-设置动画
-
-```javascript
-setInterval(() => {
-    let leftCount = utils.css(ulEl, 'left');
-    leftCount -= 2;
-    utils.css(ulEl, {
-        left: leftCount
-    });
-
-    if (Math.abs(utils.css(ulEl, 'left')) >= utils.css(ulEl, 'width') / 2) {
-        utils.css(ulEl, 'left', 0);
-        console.log(1);
-    }
-},17);
-```
-
-一开始写错是因为在外面设置了**全局变量**,而不是获取实时的left值...，所以之后的判断会无限符合条件...
-
-```javascript
-let leftCount = 0;
-setInterval(() => {
-    leftCount -= 2;
-    utils.css(ulEl, {
-        left: leftCount
-    });
-
-    if (Math.abs(utils.css(ulEl, 'left')) >= utils.css(ulEl, 'width') / 2) {
-        utils.css(ulEl, 'left', 0);
-        console.log(1);
-    }
-},17);
-```
 
