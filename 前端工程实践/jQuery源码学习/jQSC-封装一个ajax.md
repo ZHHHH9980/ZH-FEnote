@@ -1,290 +1,530 @@
-# 元素查找与索引
+# zQuery-ajax
+
+jQuery的ajax库进行了各种封装处理，体积庞大，支持的功能非常多，我们这里套一个jQuery的壳子封装一个自己的简易ajax库。
 
 
 
-## eq
-
-eq是非常常用的一个方法，用于查找多个jQuery对象中的其中某一个，核心是返回一个**jQuery对象**。
-
-> eq(index|-index)
->
-> 获取当前链式操作中第N个jQuery对象，返回jQuery对象，当参数大于等于0时为正向选取，比如0代表第一个，1代表第二个。当参数为负数时为反向选取，比如-1为倒数第一个，具体可以看以下示例。
->
-> 类似的有[get(index)](https://jquery.cuishifeng.cn/get.html),不过[get(index)](https://jquery.cuishifeng.cn/get.html)返回的是DOM对象。
-
-
-
-官网的:chestnut:
-
-Consider a page with a simple list on it:
-
-```html
-<ul>  
-    <li>list item 1</li>  
-    <li>list item 2</li>  
-    <li>list item 3</li>  
-    <li>list item 4</li>  
-    <li>list item 5</li>
-</ul>
-```
-
-We can apply this method to the set of list items:
+## jQuery中的AJAX常用功能
 
 ```js
-$( "li" ).eq( 2 ).css( "background-color", "red" );
-```
-
-
-
-### eq源码
-
-```js
-eq: function (i) {
-    var len = this.length,
-        j = +i + (i < 0 ? len : 0);
-
-    return this.pushStack(j >= 0 && j < len ? [this[j]] : []);
-}
-```
-
-
-
-### pushStack
-
-```js
-pushStack: function (elems) {
-
-    // Build a new jQuery matched element set
-    var ret = jQuery.merge(this.constructor(), elems);
-    console.log(this.constructor === jQuery); //=> true
-    
-    // Add the old object onto the stack (as a reference)
-    ret.prevObject = this;
-
-    // Return the newly-formed element set
-    return ret;
-}
-```
-
-
-
-### merge
-
-```js
-merge: function (first, second) {
-    var len = +second.length,
-        j = 0,
-        i = first.length;
-
-    // 扩展
-    for (; j < len; j++) {
-        first[i++] = second[j];
-    }
-
-    // 更新长度
-    first.length = i;
-
-    return first;
-}
-```
-
-merge方法类似于数组原型上的`concat`，就是两个对象进行合并，从这也可以看出pushStack就是做两件事：
-
-1. 将提取出来的对象跟jQuery对象合并
-2. 合并的jQuery对象上放一个`prevObject`保存合并前的对象
-
-
-
-merge真的是万金油一样的东西。
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20200814084402213.png#pic_center)
-
-
-
-`eq、merge`这些方法基本上都是照抄的...就不放了，唯一有一些问题的就是`pushStack`
-
-```js
-pushStack: function (elems) {
-
-    var ret = jQuery.merge(this.constructor(), elems);
-    //...
-}
-```
-
-`this.constructor()`实际上是返回一个空的jQuery对象，因为`merge`需要`length`这个属性。
-
-jQuery在原型上放了Length。
-
-```js
-jQuery.fn = jQuery.prototype = {
-
-        // The current version of jQuery being used
-        jquery: version,
-
-        constructor: jQuery,
-
-        // The default length of a jQuery object is 0
-        length: 0,
-//...
-```
-
-我们可以直接在实例上添加，如果后面遇到问题再修改。
-
-```js
-var init = zQuery.fn.init = function (selector, context) {
-    var nodeList,
-        i = 0;
-
-    context = context || document;
-
-    // $() 相当于调用原型方法
-    if (!selector) {
-        this.length = 0;
-        return this;
-    }
-//...
-```
-
-
-
-### index
-
-index有三种用法
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20200814092301775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70#pic_center)
-
-
-
-### index源码
-
-```js
-// Determine the position of an element within the set
-index: function (elem) {
-
-    // No argument, return index in parent
-    if (!elem) {
-        return (this[0] && this[0].parentNode) this.first().prevAll().length : -1;
-    }
-
-    // Index in selector
-    if (typeof elem === "string") {
-        return indexOf.call(jQuery(elem), this[0]);
-    }
-
-    // Locate the position of the desired element
-    return indexOf.call(this,
-
-    // If it receives a jQuery object, the first element is used
-      elem.jquery ? elem[0] : elem
-   );
-}
-```
-
-其实整体实现还是很简单，里面还有一些封装的方法，先实现功能再考虑封装。
-
-
-
-### 实现简易index
-
-```js
-first: function() {
-    return this.eq(0);
-},
-
-    index: function(elem) {	
-        // 没传参数
-        if (!elem) {
-        }
-
-        // 传入的字符串用jQuery包装一下
-        if (typeof elem === 'string') {
-        }
-
-        // 剩下就是jQuery对象/dom元素集合
-        return;
+$.ajax(url, options)
+/*
+*		url: 接口地址
+*		method: 请求方式 get/post...
+*			get请求基于?传参
+*			post请求基于请求主体
+*
+*		data的格式可以是字符串也可以是对象,如果是对象类型，
+*	会转成 xxx=xxx&xxx=xxx (www-form-urlencoded),
+*	如果是字符串就直接拼接到url后面
+*
+* 		data-type: 预设置获取结果的数据格式：JSON/HTML..
+*		jQ内部把获取的字符串转成JSON格式的对象=> 并不会影响
+*服务器返回的结果，只是把返回的结果进行了二次处理。
+*
+*		async: 设置同步异步（true:同步）
+*		cache: 设置get请求是否建立缓存。当我们设置false
+*并且当且请求是get请求，会在请求的url地址末尾追加随机数
+*（时间戳）
+*		success: 回调，当ajax请求成功执行,jQ执行回调函数的
+*	时候会把从响应主体中获取的结果当作参数传递给回调函数
+*		error:	请求失败后的回调函数	
+*
+*/
+$.ajax({
+	url: url,
+    method: 'post',
+    data:{
+        name:'zz',
+        age: 18
     },
+    async: true,
+    cache: true,
+    success: () => {
+        
+    },
+    error: () => {
+        
+    }
+})
 ```
 
-对应框架填充即可。
+不仅支持传入回调，还支持链式写法。
 
 ```js
-index: function (elem) {
-
-    var count = 0,
-        prevSibling;
-
-    // 没传参数
-    if (!elem) {
-        prevSibling = this.first()[0].previousElementSibling;
-        while(prevSibling !== null) {
-            count++;
-            prevSibling = prevSibling.previousElementSibling;
-        }
-        return count;
-    }
-
-    // 传入的字符串用jQuery包装一下
-    if (typeof elem === 'string') {
-        return Array.prototype.indexOf.call(zQuery(elem));
-    }
-
-    // 剩下就是jQuery对象/dom元素集合
-    return (
-        Array.prototype.indexOf.call(this,
-            elem && elem.zQuery ? elem[0] : elem ));
-},
+$.ajax().done(() => {
+    
+}).fail(() => {
+    
+})
 ```
 
-这里就不封装`prevAll`了。
-
-但是要一提的是`jQuery`把这些方法封装的非常优雅，有时间还是要好好学习一下。
 
 
+### 搭建框架
 
+我们这里模拟jQuery无new创建实例，将ajax单独包装起来。
 
-
-## find
-
-项目中经常会用到`find`方法。
-
-`$(document).find(el)` 有点类似于 `document.querySelector(el)`。
-
-核心是**指定上下文**和**返回jQuery对象**。
-
-jQuery中的`find`核心还是会用到`Sizzle`，我们的目的是尽可能用少的代码实现jQuery的功能。
-
-这里就用`querySelector`代替,然后包装成jQuery对象。
+为了能够支持链式写法，我们使用**promise**进行异步管理。
 
 ```js
-find: function (elem) {
-    var context = this[0] || document;
+/*
+* ajax
+* */
+zQuery.extend({
+    ajaxDefaultSettings: {
+        method: 'GET',
+        data: null,
+        dataType: 'JSON',
+        async: true,
+        cache: true
+    },
 
-    if (!elem) {
-        return this;
+    ajax: function (options) {
+        return new zQuery.ajax.prototype.init(options);
+    },
+
+
+});
+zQuery.ajax.prototype = {
+    constructor: zQuery.ajax,
+    init: function (options) {
+        let {
+            url,
+            method = 'get',
+            data = null,
+            dataType = 'JSON',
+            async,
+            cache
+        } = $.extend(zQuery.ajaxDefaultSettings, options);
+
+        // 配置挂载mount
+        $.zorEach(['url', 'method', 'data', 'dataType', 'async', 'cache'], (item) => {
+            this[item] = eval(item);
+        });
+
+        return this.send();
+
+    },
+    /*
+            * 
+            * send request
+            * */
+    send: function () {
+        let {
+            method, url, async, data
+        } = this,
+            xhr = XMLHttpRequest();
+
+        let promise = new Promise((resolve, rejected) => {
+            // success
+            
+            // fail
+        })
+
+        return promise;
+    },
+    done: function (callback) {
+
+    },
+    fail: function (callback) {
+
     }
+};
 
-    if (typeof elem === 'string') {
-        return zQuery(elem, context);
+zQuery.ajax.prototype.init.prototype = zQuery.ajax.prototype;
+```
+
+
+
+### 处理不同的响应状态
+
+```js
+zQuery.ajax.prototype = {
+	send: function() {
+        let {
+            method, url, async, data, success, error
+        } = this,
+            xhr = XMLHttpRequest();
+
+        let promise = new Promise((resolve, rejected) => {
+            // success
+            if (xhr.readyState === 4) {
+
+            }
+            
+            // fail
+            // 如果不是以2/3开头的状态码就认定为失败
+            if(!/^(2|3)\d{2}$/.test(xhr.status)) {
+                // error 是传入的回调 fail是promise的链式调用
+                error && error();
+                fail && fail();
+            }
+        })
+
+        return promise;
     }
 }
 ```
 
 
 
-## 升级zQuery
+### 处理cache
 
-新增（兄弟）元素查找
+```js
+zQuery.ajax.prototype = {
+	handleCache: function() {
+        let {url, method, cache} = this,
+            timeStamp = `_=${+(new Date())}`;
+        
+        // 不需要缓存就在后面+时间戳，保证每次url都不重复
+        if (/^get$/i.test(method) && cache === false) {
+            // xx.xx?x=1 -> xx.xx?x=1& 
+            // xx.xx -> xx.xx?
+            url += url.indexOf('?') > -1 ? '&' : '?';
+            url += timeStamp;
+            this.url = url;
+        }
+    }
+}
+```
+
+
+
+
+
+### 处理dataType
+
+返回的格式可以是'JSON‘,'XML'等等，需要对用户传入的参数做不同处理。
+
+```js
+zQuery.ajax.prototype = {
+	handleDataType: function (xhr) {
+        let dataType = this.dataType.toUpperCase(),
+            result = xhr.responseText;
+        
+        if (dataType === 'JSON') {
+            result = JSON.parse(result);
+        } else if (dataType === 'XML') {
+            result = xhr.responseXML;
+        }
+        // default: 'TEXT'
+        return result;
+    } 
+}
+```
+
+
+
+### 处理data
+
+对于`get`系列请求方式，需要使用`www-form-urlencode`传参。
+
+```js
+zQuery.ajax.prototype = {
+	handleData: function () {
+        let {method, url, data} = this,
+        	getReg = /^(get|head|options|delete|trace)$/i,
+            formatedData;
+        
+        // null
+        if (!data) {
+            return;
+        }
+        
+        formatedData += url.indexOf('?') > -1 ? '&' : '?';
+        
+        if (typeof data === 'object' && getReg.test(method)) {
+            data.zorEach(data, (key, value) => {
+                formatedData += `${key}=${value}`; 
+            })
+            this.url = formatedData;
+            this.data = null;
+        }
+    } 
+}
+```
+
+
+
+## 组装
+
+按照不同的部件，应该先装`data`，再装`cache`（url尾部加时间戳）。data完成以后就可以发送请求了。而`dataType`是对结果的处理。
+
+```js
+zQuery.ajax.prototype = {
+    constructor: zQuery.ajax,
+    init: function (options) {
+        let {
+            url,
+            method = 'get',
+            data = null,
+            dataType = 'JSON',
+            async,
+            cache,
+            success,
+            error
+        } = $.extend(zQuery.ajaxDefaultSettings, options);
+
+        // 配置挂载mount
+        $.zorEach(['url', 'method', 'data', 'dataType', 'async', 'cache', 'success', 'error'], (item) => {
+            this[item] = eval(item);
+        });
+
+        return this.send();
+
+    },
+    /*
+    *
+    * send request
+    * */
+    send: function () {
+        this.handleData();
+        this.handleCache();
+
+        let {
+            url, method, async, data, success, error
+        } = this,
+            xhr = new XMLHttpRequest();
+
+        let promise = new Promise((resolve, rejected) => {
+            xhr.open(method, url, async);
+            xhr.onreadystatechange = () => {
+                // success
+                if (xhr.readyState === 4) {
+                    
+                    console.log('success');
+                    let ret = this.handleDataType(xhr);
+                    success && success(ret);
+                    resolve(ret);
+                }
+
+                // fail
+                // 如果不是以2/3开头的状态码就认定为失败
+                if(!/^(2|3)\d{2}$/.test(xhr.status)) {
+              
+                    error && error();
+                    rejected();
+                }
+            };
+            xhr.send(data);
+        });
+
+        return promise;
+    },
+
+    handleCache: function() {
+        let {url, method, cache} = this,
+            timeStamp = `_=${+(new Date())}`;
+
+        // 不需要缓存就在后面+时间戳，保证每次url都不重复
+        if (/^get$/i.test(method) && cache === false) {
+            // xx.xx?x=1 -> xx.xx?x=1&
+            // xx.xx -> xx.xx?
+            url += url.indexOf('?') > -1 ? '&' : '?';
+            url += timeStamp;
+            this.url = url;
+        }
+    },
+
+    handleData: function () {
+        let {method, url, data} = this,
+            getReg = /^(get|head|options|delete|trace)$/i,
+            formatedData = url;
+
+        // null
+        if (!data) {
+            return;
+        }
+
+        formatedData += url.indexOf('?') > -1 ? '&' : '?';
+
+        if (typeof data === 'object' && getReg.test(method)) {
+            zQuery.zorEach(data, (key, value) => {
+                formatedData += `${key}=${value}`;
+            });
+            this.url = formatedData;
+            this.data = null;
+        }
+    },
+
+    handleDataType: function (xhr) {
+        let dataType = this.dataType.toUpperCase(),
+            result = xhr.responseText;
+
+        if (dataType === 'JSON') {
+            result = JSON.parse(result);
+        } else if (dataType === 'XML') {
+            result = xhr.responseXML;
+        }
+        // default: 'TEXT'
+        return result;
+    },
+
+    done: function (callback) {
+
+    },
+    fail: function (callback) {
+
+    }
+};
+```
+
+测试一下
+
+```js
+$.ajax({
+        url: './cart.json',
+        method: 'get',
+        dataType: 'json',
+        success: (data) => {
+            console.log(data);
+        },
+        error: () => {
+            console.log(1);
+        }
+    });
+```
+
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200815135524774.png#pic_center)
+
+
+
+### 改bug
+
+之前的写法还是有很多问题，问题主要出在`onreadystatechange`这个方法上，这个方法主要是检测`ajax`状态的变化。
+
+ajax的五个状态
+
+| 状态码 | ajax原型属性     | 表示信息                                                     |
+| ------ | :--------------- | ------------------------------------------------------------ |
+| 0      | UNSENT           | 刚开始创建XHR,还没发送请求                                   |
+| 1      | OPENED           | 已经执行了open函数，发送了请求                               |
+| 2      | HEADERS_RECEIVED | 已经发送ajax请求，响应头信息已经被客户端接收（响应头中包含了：服务器时间，HTTP状态码） |
+| 3      | LOADING          | 响应主体内容正在返回                                         |
+| 4      | DONE             | 响应主体内容已经被客户端接收                                 |
+
+状态从OPENED开始，`onreadystatechange`总共能监听到3次变化，如果像之前那么写，`fail`会执行三次，这显然有问题。
+
+```js
+let promise = new Promise((resolve, rejected) => {
+    xhr.open(method, url, async);
+    xhr.onreadystatechange = () => {
+        
+        if (xhr.readyState === 4) {
+            // success
+            if (/^2\d{2}$/.test(xhr.status)) {
+                let ret = this.handleDataType(xhr);
+                success && success(ret);
+                resolve(ret);
+
+                console.log('success');
+            }
+            
+             // fail
+        	// 如果不是以2/3开头的状态码就认定为失败
+            if (!/^([23])\d{2}$/.test(xhr.status)) {
+                error && error();
+                rejected();
+
+                console.log('fail to get data by ajax');
+            }
+        }
+    };
+    xhr.send(data);
+});
+```
+
+
+
+还有一个BUG就是链式调用的问题。
+
+```js
+send: function () {
+
+    this.zQuery_promise = new Promise((resolve, reject) => {
+
+    });
+
+    return this;
+}
+```
+
+这里应该返回ajax实例，把promise挂载到实例上才能实现链式调用。
+
+
+
+## 完善
+
+所有的BUG都修复了，现在完善链式调用。
+
+```js
+zQuery.ajax.prototype = {
+    done: function (callback) {
+        this.zQuery_promise.then((data) => {
+            callback(data);
+            console.log('done');
+        })
+        return this;
+    },
+    fail: function (callback) {
+        this.zQuery_promise.catch(() => {
+            callback();
+            console.log('fail');
+        })
+    }
+}
+```
+
+当然了，实际上还有很多问题，比如说`abort`等方法都不支持，还是有非常非常多东西需要完善的。
+
+
+
+## zQuery升级
+
+新增ajax库。
+
+```js
+$.ajax({
+    url: './cart.json',
+    method: 'get',
+    data: {},
+    dataType: 'json', // 仅支持json xml text
+    cache: false,
+    success: () => {
+        console.log('success is ok');
+    },
+    error: () => {
+        console.log('error is ok');
+    }
+}).done(() => {
+    console.log('done is ok');
+}).fail(() => {
+    console.log('fail is ok');
+});
+```
+
+
+
+zQuery
 
 ```js
 /* zQuery! */
 (function (window) {
-    var zQuery = function (selector, context) {
+    let zQuery = function (selector, context) {
         return new zQuery.fn.init(selector, context);
     },
         logo = 'zQuerymemeda',
+
+        class2type = {},
+
+        hasOwn = class2type.hasOwnProperty,
+
         isFlatObj = function (obj) {
             if (typeof obj === 'object') {
-                for (var i in obj) {
+                for (let i in obj) {
                     if (typeof obj[i] === 'object') {
                         return false;
                     }
@@ -293,7 +533,7 @@ find: function (elem) {
             return true;
         },
         isEmptyObj = function (obj) {
-            for (var item in obj) {
+            for (let item in obj) {
                 return false;
             }
             return true;
@@ -315,7 +555,7 @@ find: function (elem) {
         constructor: zQuery,
 
         eq: function (i) {
-            var len = this.length;
+            let len = this.length;
             i = i < 0 ? +i + len : i;
 
             return this.pushStack(i >= 0 && i < len ? [this[i]] : []);
@@ -327,13 +567,13 @@ find: function (elem) {
 
         index: function (elem) {
 
-            var count = 0,
+            let count = 0,
                 prevSibling;
 
             // 没传参数
             if (!elem) {
                 prevSibling = this.first()[0].previousElementSibling;
-                while(prevSibling !== null) {
+                while (prevSibling !== null) {
                     count++;
                     prevSibling = prevSibling.previousElementSibling;
                 }
@@ -357,7 +597,7 @@ find: function (elem) {
              *   将原来的元素作为prevObject保存
             */
         pushStack: function (elems) {
-            var ret;
+            let ret;
             console.log(this.constructor());
             ret = zQuery.merge(this.constructor(), elems);
 
@@ -367,7 +607,7 @@ find: function (elem) {
         },
 
         find: function (elem) {
-            var context = this[0] || document;
+            let context = this[0] || document;
 
             if (!elem) {
                 return this;
@@ -383,7 +623,7 @@ find: function (elem) {
     // 2. $.fn.extend(true, {}, {}) 深拷贝
     // 3. $.fn.extend({}, {}) 浅拷贝
     zQuery.extend = zQuery.fn.extend = function () {
-        var length = arguments.length,
+        let length = arguments.length,
             i = 1,
             options,
             name,
@@ -438,7 +678,7 @@ find: function (elem) {
 
     zQuery.extend({
         each: function (obj, callback, args) {
-            var length, i = 0,
+            let length, i = 0,
                 ret;
 
             // 如果是数组或者类数组
@@ -464,8 +704,8 @@ find: function (elem) {
         },
 
         // 将each跟forEach结合 让forEach能遍历对象
-        zorEach: function (obj, callback, args) {
-            var length, i = 0,
+        zorEach: function (obj, callback, needOwn = true) {
+            let length, i = 0,
                 ret;
 
             // 如果是数组或者类数组
@@ -481,7 +721,11 @@ find: function (elem) {
             } else {
                 // 对象就for in 循环
                 for (i in obj) {
-                    if (callback.call(obj[i], obj[i], i) === false) {
+
+                    if (needOwn && !hasOwn.call(obj, i)) return;
+
+                    // zorEach({}, (key, value)
+                    if (callback.call(obj[i], i, obj[i]) === false) {
                         break;
                     }
                 }
@@ -491,7 +735,7 @@ find: function (elem) {
         },
 
         merge: function (first, second) {
-            var length = second.length,
+            let length = second.length,
                 i = first.length,
                 j;
 
@@ -507,8 +751,8 @@ find: function (elem) {
     });
 
 
-    var init = zQuery.fn.init = function (selector, context) {
-        var nodeList,
+    let init = zQuery.fn.init = function (selector, context) {
+        let nodeList,
             i = 0;
 
         context = context || document;
@@ -551,7 +795,7 @@ find: function (elem) {
 
     },
         isArrayLike = function (obj) {
-            var length = obj.length;
+            let length = obj.length;
 
             if (!obj || !('length' in obj)) {
                 return false;
@@ -561,7 +805,7 @@ find: function (elem) {
 
         },
         dataAttr = function (elem, key, data) {
-            var name;
+            let name;
 
             if (elem.nodeType === 1 && data === undefined) {
                 if (typeof key === 'string') {
@@ -591,7 +835,7 @@ find: function (elem) {
             return on(this, types, selector, fn, 1);
         },
         off: function (types, selector, fn) {
-            var handleObj;
+            let handleObj;
 
             // 传入的是事件对象
             if (typeof types === 'object' && types.handleObj) {
@@ -616,7 +860,7 @@ find: function (elem) {
     });
 
     function on(elem, types, selector, fn, one) {
-        var origFn;
+        let origFn;
 
         // (types, fn)
         if (!fn) {
@@ -655,7 +899,7 @@ find: function (elem) {
 
     Data.prototype = {
         cache: function (owner) {
-            var value = owner[this.expando];
+            let value = owner[this.expando];
 
             if (!value) {
                 value = {};
@@ -675,7 +919,7 @@ find: function (elem) {
             owner[this.expando] && owner[this.expando][key];
         },
         set: function (owner, data, value) {
-            var cache = this.cache(owner),
+            let cache = this.cache(owner),
                 prop;
 
             if (typeof data === 'string') {
@@ -690,7 +934,7 @@ find: function (elem) {
             return cache;
         },
         remove: function (owner, key) {
-            var i,
+            let i,
                 cache = owner[this.expando];
 
             if (cache === undefined) {
@@ -718,12 +962,12 @@ find: function (elem) {
         }
     };
 
-    var dataPriv = new Data();
+    let dataPriv = new Data();
 
-    var dataUser = new Data();
+    let dataUser = new Data();
     /* 缓存模块结束 */
 
-    // var init = {
+    // let init = {
     //     elem: {
     //         jQuery351046541611:{
     //             events: {
@@ -748,7 +992,7 @@ find: function (elem) {
         // 3.将监听的事件派发
         // @params: types -> 'string' 支持绑定多个事件
         add: function (elem, types, handle, selector) {
-            var handleObj,
+            let handleObj,
                 elemData = dataPriv.get(elem),
                 handlers,
                 type,
@@ -829,7 +1073,7 @@ find: function (elem) {
         // handlers[j].handler 就是传入的回调
         remove: function (elem, types, selector, fn) {
 
-            var i,
+            let i,
                 events,
                 t,
                 type,
@@ -882,7 +1126,7 @@ find: function (elem) {
         },
 
         dispatch: function (nativeEvent) {
-            var ret,
+            let ret,
                 i,
                 j,
                 matched,
@@ -917,7 +1161,7 @@ find: function (elem) {
         },
 
         trigger: function (elem, type, data) {
-            var handle = dataPriv.get(elem) && dataPriv.get(elem).handle,
+            let handle = dataPriv.get(elem) && dataPriv.get(elem).handle,
                 event = {};
 
             console.log(handle);
@@ -931,7 +1175,7 @@ find: function (elem) {
         },
 
         handlers: function (event, handlers) {
-            var i,
+            let i,
                 cur,
                 sel,
                 handleQueue = [],
@@ -987,7 +1231,8 @@ find: function (elem) {
     // $().data() 自定义属性
     zQuery.fn.extend({
         data: function (key, value) {
-            var elem = this[0];
+            let elem = this[0],
+                data;
 
 
             // get value from html5 custom data attr or cache
@@ -1020,6 +1265,159 @@ find: function (elem) {
             })
         }
     });
+
+    /*
+        * ajax
+        * */
+    zQuery.extend({
+        ajaxDefaultSettings: {
+            method: 'GET',
+            data: null,
+            dataType: 'JSON',
+            async: true,
+            cache: true
+        },
+
+        ajax: function (options) {
+            return new zQuery.ajax.prototype.init(options);
+        },
+
+        getJSON: function (options) {
+            return zQuery.ajax($.extend(options, {
+                dataType: 'json'
+            }));
+        }
+    });
+    zQuery.ajax.prototype = {
+        constructor: zQuery.ajax,
+        init: function (options) {
+            let {
+                url,
+                method = 'get',
+                data = null,
+                dataType = 'JSON',
+                async,
+                cache,
+                success,
+                error
+            } = $.extend(zQuery.ajaxDefaultSettings, options);
+
+            // 配置挂载mount
+            $.zorEach(['url', 'method', 'data', 'dataType', 'async', 'cache', 'success', 'error'], (item) => {
+                this[item] = eval(item);
+            });
+
+            return this.send();
+
+        },
+        /*
+            *
+            * send request
+            * */
+        send: function () {
+            this.handleData();
+            this.handleCache();
+
+            let {
+                url, method, async, data, success, error
+            } = this,
+                xhr = new XMLHttpRequest();
+
+            this.zQuery_promise  = new Promise((resolve, rejected) => {
+
+                xhr.open(method, url, async);
+                xhr.onreadystatechange = () => {
+
+                    if (xhr.readyState === 4) {
+                        // success
+                        if (/^2\d{2}$/.test(xhr.status)) {
+                            let ret = this.handleDataType(xhr);
+                            success && success(ret);
+                            resolve(ret);
+
+                            console.log('success');
+                        }
+
+                        // fail
+                        // 如果不是以2/3开头的状态码就认定为失败
+                        if (!/^([23])\d{2}$/.test(xhr.status)) {
+                            error && error();
+                            rejected();
+
+                            console.log('fail to get data by ajax');
+                        }
+                    }
+                };
+                xhr.send(data);
+            });
+
+            return this;
+        },
+
+        handleCache: function () {
+            let {url, method, cache} = this,
+                timeStamp = `_=${+(new Date())}`;
+
+            // 不需要缓存就在后面+时间戳，保证每次url都不重复
+            if (/^get$/i.test(method) && cache === false) {
+                // xx.xx?x=1 -> xx.xx?x=1&
+                // xx.xx -> xx.xx?
+                url += url.indexOf('?') > -1 ? '&' : '?';
+                url += timeStamp;
+                this.url = url;
+            }
+        },
+
+        handleData: function () {
+            let {method, url, data} = this,
+                getReg = /^(get|head|options|delete|trace)$/i,
+                formatedData = url;
+
+            // null
+            if (!data) {
+                this.data = null;
+                return;
+            }
+
+            formatedData += url.indexOf('?') > -1 ? '&' : '?';
+
+            if (typeof data === 'object' && getReg.test(method)) {
+                zQuery.zorEach(data, (key, value) => {
+                    formatedData += `${key}=${value}`;
+                });
+                this.url = formatedData;
+                this.data = null;
+            }
+        },
+
+        handleDataType: function (xhr) {
+            let dataType = this.dataType.toUpperCase(),
+                result = xhr.responseText;
+
+            if (dataType === 'JSON') {
+                result = JSON.parse(result);
+            } else if (dataType === 'XML') {
+                result = xhr.responseXML;
+            }
+            // default: 'TEXT'
+            return result;
+        },
+
+        done: function (callback) {
+            this.zQuery_promise.then((resolve) => {
+                callback(resolve);
+            });
+            return this;
+        },
+        fail: function (callback) {
+            this.zQuery_promise.catch(() => {
+                callback();
+            })
+        }
+    };
+
+    zQuery.ajax.prototype.init.prototype = zQuery.ajax.prototype;
+
     window.$ = zQuery;
 })(window);
 ```

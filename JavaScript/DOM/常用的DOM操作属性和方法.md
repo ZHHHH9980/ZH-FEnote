@@ -54,19 +54,20 @@
 
 <br>
 
-[描述节点和节点之间关系的属性]
+[描述节点和节点之间关系的属性]						 	 							
 
-​					nodeType   	nodeName		nodeValue
+|          | nodeType | nodeName   | nodeValue |
+| -------- | :------: | ---------- | --------- |
+| 元素节点 |    1     | 大写标签名 | null      |
+| 文本节点 |    3     | #text      | 文本内容  |
+| 注释节点 |    8     | #comment   | 注释内容  |
+| 文档节点 |    9     | #document  | null      |
 
-​ 	 元素节点 		1			大写标签名			    null
-
-​	文本节点		3			#text			  	文本内容
-
-​	注释节点	 	8			#comment			注释内容
-
-​	文档节点	 	9			#document			null
+[详细参考mdn](https://developer.mozilla.org/zh-CN/docs/Web/API/Node/nodeType)
 
 <br>
+
+
 
 childNodes:所有子节点
 
