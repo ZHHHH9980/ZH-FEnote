@@ -27,6 +27,7 @@
 
 - [ajax](./JavaScript/异步/AJAX.md)
 - [get/post区别](./JavaScript/异步/get和post的区别.md)
+- [promise-学习总结](./JavaScript/异步/get和post的区别.md)
 
 
 
