@@ -1,6 +1,6 @@
 # 前端知识框架:v:
 
-》》建立知识框架，整理琐碎的知识，打造知识体系《《
+》》以下是本人学习前端记录的知识笔记，知识来源于网络/书籍，来源会注明出处《《
 
 [![](https://img.shields.io/badge/Note-JavaScript-important)](点击跳转的链接)	[![](https://img.shields.io/badge/Note-Css-blue)](点击跳转的链接) 	![](https://img.shields.io/badge/Note-计算机网络-blueviolet)
 
@@ -104,6 +104,12 @@
   - [webpack核心概念](./前端工程实践/webpack/webpack核心概念.md)
   - [webpack快速上手](./前端工程实践/webpack/webpack快速上手.md)
   - [webpack加载资源](./前端工程实践/webpack/webpack加载资源.md)
+
+
+
+- Vue
+  - [1.Vue中的data如何实现响应式？](./前端工程实践/Vue/1.Vue中的data如何实现响应式？.md)
+  - [2.Vue基础指令](./前端工程实践/Vue/2.Vue基础指令.md)
 
 
 
