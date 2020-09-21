@@ -73,3 +73,22 @@ span img input button
 
 
 7.通过flex实现一个三点的骰子。
+
+
+
+### 8.如何画一个三角形
+
+```css
+/*三角形原理：边框的均分原理*/
+div {
+    width:0px;
+    height:0px;
+    border-top:10px solid red;
+    border-right:10px solid transparent;
+    border-bottom:10px solid transparent;
+    border-left:10px solid transparent;
+}
+```
+
+
+

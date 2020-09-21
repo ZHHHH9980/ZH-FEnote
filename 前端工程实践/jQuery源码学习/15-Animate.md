@@ -188,7 +188,7 @@ function FX(elem, options, name){
 
 > custom方法的任务主要是把当前fx对象放入全局的timer,并且启动定时器来观察动画执行情况。
 
-(jQuery的设计实在是太难了)
+
 
 
 
