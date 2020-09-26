@@ -13,7 +13,6 @@
 ### 类型
 
 - [JS基本数据类型](https://github.com/ZHHHH9980/ZH-FEnote/blob/master/JavaScript/类型/JavaScript基本数据类型.md)
-- JS引用数据类型
 - [JavaScript数据类型转换汇总](https://github.com/ZHHHH9980/ZH-FEnote/blob/master/JavaScript/类型/JavaScript数据类型转换汇总.md)
 
 ### 对象
@@ -110,6 +109,7 @@
 - Vue
   - [1.Vue中的data如何实现响应式？](./前端工程实践/Vue/1.Vue中的data如何实现响应式？.md)
   - [2.Vue基础指令](./前端工程实践/Vue/2.Vue基础指令.md)
+  - [3.核心应用](./前端工程实践/Vue/3.核心应用.md)
 
 
 
