@@ -14,6 +14,8 @@
   },
 
   // vim
+  // 命令等待时间
+  "vim.timeout": 500,
   // 使用系统剪切板,实质是将默认寄存器的内容拷贝到剪切版中
   "vim.useSystemClipboard": true,
   "vim.easymotion": true,
@@ -46,7 +48,7 @@
     },
     {
       "before": ["a", "'"],
-      "after": ["c", "'", "'","<Esc>", "j", "\"", "a", "p"]
+      "after": ["c", "'", "'", "<Esc>", "j", "\"", "a", "p"]
     },
     {
       "before": ["a", "\""],
@@ -103,7 +105,6 @@
     }
   ],
   "vim.commandLineModeKeyBindingsNonRecursive": [
-;
     // 在命令行统一插入符号
     {
       "before": ["J"],
@@ -115,6 +116,20 @@
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
+    // ctrl+w 切换分屏 j -> h
+    {
+      "before": ["<C-w>", "j"],
+      "after": ["<C-w>", "h"]
+    },
+    // 切换标签页
+    {
+      "before": ["E"],
+      "after": ["g", "T"]
+    },
+    {
+      "before": ["R"],
+      "after": ["g", "t"]
+    },
     // 删除的内容放入a寄存器中
     { "before": ["c"], "after": ["\"", "a", "c"] },
     { "before": ["C"], "after": ["\"", "a", "C"] },
