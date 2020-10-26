@@ -1,0 +1,187 @@
+{
+  "workbench.colorTheme": "Tiny Light",
+  "window.zoomLevel": 1,
+  "files.autoSave": "onFocusChange",
+
+  "editor.fontSize": 20,
+  "editor.lineNumbers": "relative",
+  "editor.formatOnSave": true,
+
+  // prettier
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // vim
+  // 使用系统剪切板,实质是将默认寄存器的内容拷贝到剪切版中
+  "vim.useSystemClipboard": true,
+  "vim.easymotion": true,
+  "vim.sneak": true,
+  "vim.surround": true,
+  "vim.enableNeovim": true,
+  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  // 前一个是转义字符
+  "vim.leader": "\\",
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.visualModeKeyBindings": [
+    // 以下操作是在视图模式下在选中的两端快速添加,(),[],{},'',"",<>,``
+    // 意为 add + ()
+    {
+      "before": ["a", "("],
+      "after": ["c", "(", "<Esc>", "j", "\"", "a", "p"]
+    },
+    {
+      "before": ["a", "{"],
+      "after": ["c", "{", "<Esc>", "j", "\"", "a", "p"]
+    },
+    {
+      "before": ["a", "["],
+      "after": ["c", "[", "<Esc>", "j", "\"", "a", "p"]
+    },
+    {
+      "before": ["a", "'"],
+      "after": ["c", "'", "'","<Esc>", "j", "\"", "a", "p"]
+    },
+    {
+      "before": ["a", "\""],
+      "after": ["c", "\"", "\"", "<Esc>", "j", "\"", "a", "p"]
+    },
+    {
+      "before": ["a", "<"],
+      "after": ["c", "<", ">", "<Esc>", "j", "\"", "a", "p"]
+    },
+    {
+      "before": ["a", "`"],
+      "after": ["c", "`", "`", "<Esc>", "j", "\"", "a", "p"]
+    }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    // 跟norm模式下统一方向
+    {
+      "before": ["k"],
+      "after": ["j"]
+    },
+    {
+      "before": ["i"],
+      "after": ["k"]
+    },
+
+    {
+      "before": ["j"],
+      "after": ["h"]
+    },
+    // v至行首 行尾
+    {
+      "before": ["L"],
+      "after": ["$"]
+    },
+    {
+      "before": ["J"],
+      "after": ["^"]
+    },
+    //将o映射成i 这就能j正常使用 v o(i)
+    {
+      "before": ["o"],
+      "after": ["i"]
+    },
+    // 删除的内容放入a寄存器中
+    { "before": ["c"], "after": ["\"", "a", "c"] },
+    { "before": ["C"], "after": ["\"", "a", "C"] },
+    {
+      "before": ["d"],
+      "after": ["\"", "_", "d"]
+    },
+    {
+      "before": ["d", "d"],
+      "after": ["\"", "a", "d", "d"]
+    }
+  ],
+  "vim.commandLineModeKeyBindingsNonRecursive": [
+;
+    // 在命令行统一插入符号
+    {
+      "before": ["J"],
+      "after": ["I"]
+    },
+    {
+      "before": ["L"],
+      "after": ["A"]
+    }
+  ],
+  "vim.normalModeKeyBindingsNonRecursive": [
+    // 删除的内容放入a寄存器中
+    { "before": ["c"], "after": ["\"", "a", "c"] },
+    { "before": ["C"], "after": ["\"", "a", "C"] },
+    {
+      "before": ["d"],
+      "after": ["\"", "a", "d"]
+    },
+    {
+      "before": ["d", "d"],
+      "after": ["\"", "a", "d", "d"]
+    },
+    {
+      // 当行尾部快速添加分号
+      // 但是这里会留在末尾，看看能不能改进一下
+      // 改进完成 使用mark操作
+      "before": ["a", ";"],
+      // mark this postion into "a"
+      // use `a go back
+      "after": ["m", "a", "$", "a", ";", "<Esc>", "`", "a"]
+    },
+    {
+      "before": ["<space>"],
+      "after": ["a"]
+    },
+    {
+      "before": ["k"],
+      "after": ["j"]
+    },
+    {
+      "before": ["i"],
+      "after": ["k"]
+    },
+
+    {
+      "before": ["j"],
+      "after": ["h"]
+    },
+    // 修改行首行尾插入
+    {
+      "before": ["J"],
+      "after": ["I"]
+    },
+    {
+      "before": ["L"],
+      "after": ["A"]
+    },
+    // sneak
+    {
+      "before": ["<leader>", "s"],
+      "after": ["<leader>", "<leader>", "s"]
+    },
+    // 删除至行首 行尾
+    {
+      "before": ["d", "L"],
+      "after": ["d", "$"]
+    },
+    {
+      "before": ["d", "J"],
+      "after": ["d", "^"]
+    }
+  ],
+
+  "vim.handleKeys": {
+    "<C-a>": false,
+    "<C-f>": false,
+    "<C-n>": false,
+    "<C-c>": false,
+    "<C-x>": false
+  }
+}
