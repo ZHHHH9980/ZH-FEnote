@@ -99,9 +99,28 @@
       "before": ["d"],
       "after": ["\"", "_", "d"]
     },
+    // 修改逻辑：
+    // 1. dd c删除的内容放入a寄存器中, 也就是一般不需要使用的脏值放入a寄存器
+    // 2. 输入n dd 表示 need content delete 需要delete的content
+    { "before": ["c"], "after": ["\"", "a", "c"] },
+    { "before": ["C"], "after": ["\"", "a", "C"] },
+    { "before": ["n", "c"], "after": ["c"] },
+    { "before": ["n", "C"], "after": ["C"] },
+    {
+      "before": ["d"],
+      "after": ["\"", "a", "d"]
+    },
+    {
+      "before": ["n", "d"],
+      "after": ["d"]
+    },
     {
       "before": ["d", "d"],
       "after": ["\"", "a", "d", "d"]
+    },
+    {
+      "before": ["n", "d", "d"],
+      "after": ["d", "d"]
     }
   ],
   "vim.commandLineModeKeyBindingsNonRecursive": [
@@ -116,6 +135,10 @@
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["h"],
+      "after": ["i"]
+    },
     // ctrl+w 切换分屏 j -> h
     {
       "before": ["<C-w>", "j"],
@@ -130,16 +153,28 @@
       "before": ["R"],
       "after": ["g", "t"]
     },
-    // 删除的内容放入a寄存器中
+    // 修改逻辑：
+    // 1. dd c删除的内容放入a寄存器中, 也就是一般不需要使用的脏值放入a寄存器
+    // 2. 输入n dd 表示 need content delete 需要delete的content
     { "before": ["c"], "after": ["\"", "a", "c"] },
     { "before": ["C"], "after": ["\"", "a", "C"] },
+    { "before": ["n", "c"], "after": ["c"] },
+    { "before": ["n", "C"], "after": ["C"] },
     {
       "before": ["d"],
       "after": ["\"", "a", "d"]
     },
     {
+      "before": ["n", "d"],
+      "after": ["d"]
+    },
+    {
       "before": ["d", "d"],
       "after": ["\"", "a", "d", "d"]
+    },
+    {
+      "before": ["n", "d", "d"],
+      "after": ["d", "d"]
     },
     {
       // 当行尾部快速添加分号
@@ -198,5 +233,9 @@
     "<C-n>": false,
     "<C-c>": false,
     "<C-x>": false
+  },
+  "launch": {
+    "configurations": [],
+    "compounds": []
   }
 }
