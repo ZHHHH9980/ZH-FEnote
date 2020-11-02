@@ -173,3 +173,49 @@ git branch -d newbee
 `git merge [branch name]`
 
 `switch`to 本地分支，然后输入`git merge[远程分支名]`，才能将**本地分支更新；**
+
+
+
+### 推送代码到远程仓库
+
+`git push[远程仓库别名]`
+
+
+
+## 三种分支之间的关系:star:
+
+- 远程分支
+- 远程跟踪分支
+- 本地分支
+
+`远程跟踪分支`是远程分支跟本地分支的一个**媒介**；
+
+### 不同命令的分支表现：
+
+1. `git clone`本地分支与远程跟踪分支建立同步关系；
+2. `git fetch` & `git push`都是 **远程分支和远程跟踪分支**建立同步关系；
+   - 如果需要在本地分支上与远程分支建立联系，必须让本地分支与`远程跟踪分支`建立联系；
+
+:chestnut:
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201102230758153.png#pic_center)
+
+在这种情况下，`git push`是会报错的，需要设置上游分支，即远程跟踪分支；
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2020110223183390.png#pic_center) 
+
+
+
+### git pull
+
+git pull 是 git fetch（更新远程跟踪分支）和 git merge（将**本地分支**合并远程跟踪分支）两个命令的封装；
+
+:star::star::star::star::star:
+
+使用`git pull`之前得先使用`git branch -u <remote>/<branch>` 让当前本地分支跟踪远程跟踪分支（建立联系）
+
+
+
+### 小结
+
+无论是`git push`还是`git pull`都是操作**远程跟踪分支跟远程分支**,想要在本地`pull`/`push`，都必须先用本地分支**跟踪**（`push`是设置上游远程跟踪分支，`pull`是track远程跟踪分支）才能使用命令；
