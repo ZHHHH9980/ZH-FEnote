@@ -1,0 +1,175 @@
+
+
+## git
+
+
+
+### 对象
+
+#### git对象
+
+> git核心部分是一个简单的**键值对(key:value)数据库**。你可以向该数据库插入任意类型的内容，它会返回一个键值，通过该键值可以在任意时刻再次检索内容；
+
+内部存储的数据类型是`blob`类型；
+
+每次写入一个版本都会生成一个hash值存入git中的object；
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201101155920582.png#pic_center)
+
+这样就会存在一些问题：
+
+1. 记住每一个文件的版本对应的hash值不现实
+2. 文件名并没有保存，hash值保存文件的**内容**
+
+**解决方案**:树对象
+
+
+
+#### 树对象
+
+树对象存储的是整个项目的版本，与git对象不同，树对象针对的是**文件**，而不是文件的改动；
+
+每生成一个版本，会有一个`bak`指针指向之前的版本和包裹当前版本的树：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201101164232550.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70#pic_center)
+
+生成的树对象同样存在一个问题，就是必须得记住hash值，而且也不知道每次修改提交都做了什么；
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201101164347908.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70#pic_center)
+
+
+
+#### commit对象
+
+> commit对象是对数对象的一个包裹，增加了一些作者和提交者的信息；
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201102100133941.png#pic_center)
+
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201102100353353.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70#pic_center)
+
+
+
+### 小结
+
+ 项目的快照就是一个`树对象`,项目的版本就是一个`提交对象`；
+
+
+
+## 高阶命令
+
+### 增
+
+### add命令封装了哪些操作？
+
+- git add .
+  - git hash-object -w filename
+  - git update-index  (提交到暂存区)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201102101955891.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70#pic_center)
+
+### commit 命令
+
+- git commit -m "注释内容"
+  - git write-tree
+  - git commit-tree
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201102103030546.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70#pic_center)
+
+
+
+### 删
+
+git rm <filename> 删除工作区文件，再将修改提交到暂存区
+
+### 改
+
+git mv <previous filename> <lastest filename> 重命名文件
+
+### 查
+
+#### git diff
+
+查看当前更新未`stage`的文件；
+
+git diff  --staged
+
+查看哪些修改已经`staged`，只是还没有提交；
+
+
+
+#### git status
+
+
+
+## git 分支
+
+### 创建分支
+
+`git branch  <branchname>` 创建一个新的分支，在当前提交对象上创建一个指针；
+
+
+
+:star::star::star:
+
+`git branch name commitHash`新建一个分支，并且使分支指向对应的提交对象；
+
+> 这个命令在**版本穿梭**中非常有用，新建之后使用switch切换到提交对象，就可以查看历史版本的文件；
+
+
+
+### 查看分支历史
+
+` git log --oneline --decorate --graph --all`
+
+这个名字太长了，可以使用`git config`配置别名
+
+input:
+
+```
+git config --global alias.sb "log --oneline --decorate --graph --all"
+之后输入 git sb(showBranch)即可
+```
+
+
+
+### 删除分支
+
+```
+git branch -d newbee
+```
+
+
+
+## 远程协作
+
+查看远程仓库
+
+`git remote -v`
+
+
+
+建立远程仓库的连接 [远程仓库别名（默认是origin）]
+
+`git remote add [remote name]` https://github.com/.sample.git
+
+
+
+建立连接之后，就会生成一个**远程跟踪分支**
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201102163121429.png#pic_center)
+
+
+
+### 更新项目
+
+`git fetch`拉取远程项目；
+
+:boxing_glove:拉取远程项目以后，分支并不会切换，也就是在本地分支`(fetch之后)`的情况下，貌似并没有拉取到项目；这时候需要使用`git switch`来切换到远程分支才能看到fetch的最新版本项目；
+
+:star::star::star::star::star:
+
+`git merge [branch name]`
+
+`switch`to 本地分支，然后输入`git merge[远程分支名]`，才能将**本地分支更新；**
