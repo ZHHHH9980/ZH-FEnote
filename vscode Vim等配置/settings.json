@@ -22,7 +22,7 @@
   "vim.sneak": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
@@ -123,6 +123,7 @@
       "after": ["d", "d"]
     }
   ],
+
   "vim.commandLineModeKeyBindingsNonRecursive": [
     // 在命令行统一插入符号
     {
@@ -132,6 +133,16 @@
     {
       "before": ["L"],
       "after": ["A"]
+    }
+  ],
+  "vim.normalModeKeyBindings": [
+    {
+      "before": ["<leader>", "r", "n"],
+      "commands": [":set relativenumber"]
+    },
+    {
+      "before": ["<leader>", "n"],
+      "commands": [":set number"]
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
@@ -155,7 +166,7 @@
     },
     // 修改逻辑：
     // 1. dd c删除的内容放入a寄存器中, 也就是一般不需要使用的脏值放入a寄存器
-    // 2. 输入n dd 表示 need content delete 需要delete的content
+    // 2. 输入n dd 表示 need content delete 需要delete的content, 这样输入的话会剪切
     { "before": ["c"], "after": ["\"", "a", "c"] },
     { "before": ["C"], "after": ["\"", "a", "C"] },
     { "before": ["n", "c"], "after": ["c"] },
