@@ -288,6 +288,35 @@ git pull 是 git fetch（更新远程跟踪分支）和 git merge（将**本地�
 
 
 
+## rebase应用场景
+
+### 1. 合并多个commit
+
+首先`git log`查看自己`commit`的记录；
+
+`git rebase -i HEAD~3` ：合并HEAD指向包括HEAD的三个版本；
+
+or `git rebase -i 版本号`：合并HEAD直到指定的版本号；
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201104225857783.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70#pic_center)
+
+作用是将多个提交记录整合到一起，使git 记录更加简洁；
+
+❗注意事项：尽量不要对已经`push`到远程仓库的代码使用`rebase`整合提交记录
+
+
+
+### 2. rebase让分支更简洁
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20201104233208326.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1pIZ29nb2dvaGE=,size_16,color_FFFFFF,t_70#pic_center)
+
+1. `git checkout dev`
+
+2. `git rebase master`
+3. ---------leader做的事情
+4. `git checkout master`
+5. `git merge dev`
+
 ## 实战
 
 `git fetch [origin]`
