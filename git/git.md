@@ -283,3 +283,51 @@ git pull 是 git fetch（更新远程跟踪分支）和 git merge（将**本地�
 
 
 这两个操作的核心都是将**远程代码合并到本地，形成一个新的版本；**
+
+无论是`git push`还是`git pull`都是操作**远程跟踪分支跟远程分支**,想要在本地`pull`/`push`，都必须先用本地分支**跟踪**（`push`是设置上游远程跟踪分支，`pull`是track远程跟踪分支）才能使用命令；
+
+
+
+## 实战
+
+`git fetch [origin]`
+
+在`git clone`之后使用，拉取**远程仓库的所有远程跟踪分支；**
+
+
+
+`git checkout --track origin/master`
+
+创建一个本地分支[master]去远程跟踪分支；
+
+
+
+`git pull`
+
+拉取远程跟踪分支的代码；
+
+
+
+### 解决冲突
+
+`git fetch [origin]`
+
+在`git clone`之后使用，拉取**远程仓库的所有远程跟踪分支；**
+
+
+
+`git checkout --track origin/master`
+
+创建一个本地分支[master]去远程跟踪分支；
+
+
+
+`git pull`
+
+拉取远程代码
+
+如果存在冲突，会提示先`git commit`提交版本
+
+如果不存在冲突，就会将本地分支`merge`远程跟踪分支
+
+公司的话一般使用`git pull --rebase`拉取代码，合并冲突；
