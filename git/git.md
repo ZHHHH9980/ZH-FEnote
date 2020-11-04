@@ -317,6 +317,24 @@ or `git rebase -i 版本号`：合并HEAD直到指定的版本号；
 4. `git checkout master`
 5. `git merge dev`
 
+
+
+### 3.拉取远程代码后使用rebase
+
+远程代码有更新，使用`git pull`拉取代码会产生分叉；因为`pull`中包含了`merge`的操作；
+
+所以拉取代码使用rebase更加简洁：
+
+1. `git fetch origin/dev`
+2. `git rebase origin/dev`
+
+
+
+:exclamation: 注意事项：`git rebase`产生冲突；
+
+1. 解决冲突，然后`git add`
+2. `git rebase --continue`
+
 ## 实战
 
 `git fetch [origin]`
