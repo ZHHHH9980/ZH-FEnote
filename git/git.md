@@ -206,6 +206,12 @@ git branch -d newbee
 
 
 
+### git fetch
+
+将远程仓库的**所有分支**拉取下来，但是并不会与任何分支建立连接，如果需要拉取某个分支的代码，需要手动`merge`；
+
+
+
 ### git pull
 
 git pull 是 git fetch（更新远程跟踪分支）和 git merge（将**本地分支**合并远程跟踪分支）两个命令的封装；
@@ -216,6 +222,64 @@ git pull 是 git fetch（更新远程跟踪分支）和 git merge（将**本地�
 
 
 
-### 小结
+### git push
 
-无论是`git push`还是`git pull`都是操作**远程跟踪分支跟远程分支**,想要在本地`pull`/`push`，都必须先用本地分支**跟踪**（`push`是设置上游远程跟踪分支，`pull`是track远程跟踪分支）才能使用命令；
+> 当你想要公开分享一个分支时，需要将其推送到有写入权限的远程分支上；
+
+`git push origin [branchName]`
+
+
+
+#### git checkout
+
+1. 本地分支**没有创建**的情况下，跟踪远程跟踪分支
+
+`git checkout -b [branchName] [origin/branchName]` / 
+
+`git checkout --track [origin/branchName]` 直接创建一个与远程跟踪分支建立联系的本地分支； 
+
+
+
+2. 本地分支**已经创建**的情况下，跟踪远程跟踪分支
+
+   `git branch -u origin/[branchName]`
+
+
+
+:star::star::star:
+
+`git branch -vv`查看设置的所有**跟踪分支；**
+
+
+
+### 小结：一个本地分支如何去跟踪一个远程跟踪分支？
+
+1. `git clone`的时候会自动生成一个`master`本地分支，且已经跟踪了对应的远程跟踪分支；
+2. `git checkout`用于track远程跟踪分支;
+
+3. 无论是`git push`还是`git pull`都是操作**远程跟踪分支和远程分支**,想要在本地`pull`/`push`，都必须先用本地分支**跟踪**（`push`是设置上游远程跟踪分支，`pull`是track远程跟踪分支）才能使用命令；
+
+
+
+
+
+## merge 和 rebase的区别
+
+其实这个时候E不应该提交，因为提交后会发生冲突。如何解决这些冲突呢？有以下两种方法：
+
+1、git merge
+用git pull命令把"origin"分支上的修改pull下来与本地提交合并（merge）成版本M，但这样会形成图中的菱形，让人很困惑。
+
+![img](https://images2015.cnblogs.com/blog/907596/201609/907596-20160922155107949-1520786903.png)
+
+2、git rebase
+创建一个新的提交R，R的文件内容和上面M的一样，但我们将E提交废除，当它不存在（图中用虚线表示）。由于这种删除，小李不应该push其他的repository.rebase的好处是避免了菱形的产生，保持提交曲线为直线，让大家易于理解。
+
+![img](https://images2015.cnblogs.com/blog/907596/201609/907596-20160922155132715-596060966.png)
+
+在rebase的过程中，有时也会有conflict，这时Git会停止rebase并让用户去解决冲突，解决完冲突后，用git add命令去更新这些内容，然后不用执行git-commit,直接执行git rebase --continue,这样git会继续apply余下的补丁。
+在任何时候，都可以用git rebase --abort参数来终止rebase的行动，并且mywork分支会回到rebase开始前的状态。
+
+
+
+这两个操作的核心都是将**远程代码合并到本地，形成一个新的版本；**
