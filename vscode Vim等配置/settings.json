@@ -240,7 +240,6 @@
       "after": ["m", "a", "$", "a", ";", "<Esc>", "`", "a"]
     },
     // add "" surrounding a word
-    // fix last word can not add double "
     {
       "before": ["a", "\""],
       "after": [
@@ -249,7 +248,7 @@
         "d",
         "i",
         "w",
-        "a",
+        "i",
         "\"",
         "\"",
         "<Esc>",
@@ -262,7 +261,7 @@
     // add '' surrounding a word
     {
       "before": ["a", "'"],
-      "after": ["\"", "a", "d", "i", "w", "a", "'", "<Esc>", "\"", "a", "p"]
+      "after": ["\"", "a", "d", "i", "w", "i", "'", "<Esc>", "\"", "a", "p"]
     },
     {
       "before": ["<space>"],
