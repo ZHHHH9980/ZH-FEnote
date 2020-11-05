@@ -1,6 +1,6 @@
 {
   "workbench.colorTheme": "Tiny Light",
-  "window.zoomLevel": 1,
+  "window.zoomLevel": 0,
   "files.autoSave": "onFocusChange",
 
   "editor.fontSize": 20,
@@ -29,6 +29,54 @@
     {
       "before": ["j", "k"],
       "after": ["<Esc>"]
+    },
+
+    // cc -> console.log()
+    {
+      "before": ["c", "s"],
+      "after": [
+        "c",
+        "o",
+        "n",
+        "s",
+        "o",
+        "l",
+        "e",
+        ".",
+        "l",
+        "o",
+        "g",
+        "(",
+        ")",
+        "<Esc>",
+        "h"
+      ]
+    }
+  ],
+  "vim.insertModeKeyBindingsNonRecursive": [
+    {
+      "before": [".", "l", "o", "g"],
+      "after": [
+        "<Esc>",
+        "v",
+        "3",
+        "j",
+        "n",
+        "d",
+        "J",
+        "c",
+        "o",
+        "n",
+        "s",
+        "o",
+        "l",
+        "e",
+        ".",
+        "l",
+        "o",
+        "g",
+        "("
+      ]
     }
   ],
   "vim.visualModeKeyBindings": [
@@ -135,6 +183,7 @@
       "after": ["A"]
     }
   ],
+  // 快捷设置相对行号和绝对行号
   "vim.normalModeKeyBindings": [
     {
       "before": ["<leader>", "r", "n"],
@@ -248,5 +297,7 @@
   "launch": {
     "configurations": [],
     "compounds": []
-  }
+  },
+  "editor.hover.delay": 0,
+  "editor.suggest.snippetsPreventQuickSuggestions": false
 }
