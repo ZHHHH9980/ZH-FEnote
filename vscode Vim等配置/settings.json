@@ -17,7 +17,7 @@
 
   // vim
   // 命令等待时间
-  "vim.timeout": 300,
+  "vim.timeout": 500,
   // 使用系统剪切板,实质是将默认寄存器的内容拷贝到剪切版中
   "vim.useSystemClipboard": true,
   "vim.easymotion": true,
@@ -229,6 +229,7 @@
       "before": ["n", "d", "d"],
       "after": ["d", "d"]
     },
+
     {
       // 当行尾部快速添加分号
       // 但是这里会留在末尾，看看能不能改进一下
@@ -237,6 +238,31 @@
       // mark this postion into "a"
       // use `a go back
       "after": ["m", "a", "$", "a", ";", "<Esc>", "`", "a"]
+    },
+    // add "" surrounding a word
+    // fix last word can not add double "
+    {
+      "before": ["a", "\""],
+      "after": [
+        "\"",
+        "a",
+        "d",
+        "i",
+        "w",
+        "a",
+        "\"",
+        "\"",
+        "<Esc>",
+        "h",
+        "\"",
+        "a",
+        "p"
+      ]
+    },
+    // add '' surrounding a word
+    {
+      "before": ["a", "'"],
+      "after": ["\"", "a", "d", "i", "w", "a", "'", "<Esc>", "\"", "a", "p"]
     },
     {
       "before": ["<space>"],
