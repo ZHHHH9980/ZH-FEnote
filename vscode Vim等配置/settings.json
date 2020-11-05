@@ -6,6 +6,8 @@
   "editor.fontSize": 20,
   "editor.lineNumbers": "relative",
   "editor.formatOnSave": true,
+  "editor.hover.delay": 0,
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
 
   // prettier
   "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -15,26 +17,41 @@
 
   // vim
   // 命令等待时间
-  "vim.timeout": 500,
+  "vim.timeout": 300,
   // 使用系统剪切板,实质是将默认寄存器的内容拷贝到剪切版中
   "vim.useSystemClipboard": true,
   "vim.easymotion": true,
   "vim.sneak": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
     {
       "before": ["j", "k"],
       "after": ["<Esc>"]
-    },
-
+    }
+  ],
+  // 非递归指的是remap全部恢复出厂设置
+  "vim.insertModeKeyBindingsNonRecursive": [
     // cc -> console.log()
     {
       "before": ["c", "s"],
+      "after": ["c", "o", "n", "s", "o", "l", "e", ".", "l", "o", "g", "(", ")"]
+    },
+    // xx.log ->  console.log(xx);
+    {
+      "before": [".", "l", "o", "g"],
       "after": [
+        "<Esc>",
+        "v",
+        "T",
+        "<Space>",
+        "\"",
+        "a",
+        "d",
+        "a",
         "c",
         "o",
         "n",
@@ -47,38 +64,14 @@
         "o",
         "g",
         "(",
-        ")",
         "<Esc>",
-        "h"
+        "\"",
+        "a",
+        "p"
       ]
     }
   ],
-  "vim.insertModeKeyBindingsNonRecursive": [
-    {
-      "before": [".", "l", "o", "g"],
-      "after": [
-        "<Esc>",
-        "v",
-        "3",
-        "j",
-        "n",
-        "d",
-        "J",
-        "c",
-        "o",
-        "n",
-        "s",
-        "o",
-        "l",
-        "e",
-        ".",
-        "l",
-        "o",
-        "g",
-        "("
-      ]
-    }
-  ],
+
   "vim.visualModeKeyBindings": [
     // 以下操作是在视图模式下在选中的两端快速添加,(),[],{},'',"",<>,``
     // 意为 add + ()
@@ -292,12 +285,11 @@
     "<C-f>": false,
     "<C-n>": false,
     "<C-c>": false,
-    "<C-x>": false
+    "<C-x>": false,
+    "<C-y>": false
   },
   "launch": {
     "configurations": [],
     "compounds": []
-  },
-  "editor.hover.delay": 0,
-  "editor.suggest.snippetsPreventQuickSuggestions": false
+  }
 }
