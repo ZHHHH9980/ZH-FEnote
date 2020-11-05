@@ -330,10 +330,12 @@ or `git rebase -i 版本号`：合并HEAD直到指定的版本号；
 
 
 
-:exclamation: 注意事项：`git rebase`产生冲突；
+### :exclamation: 注意事项：`git rebase`产生冲突；
 
 1. 解决冲突，然后`git add`
 2. `git rebase --continue`
+
+
 
 ## 实战
 
