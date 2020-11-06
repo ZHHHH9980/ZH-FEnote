@@ -76,6 +76,41 @@
         "p"
       ]
     },
+    // xxx.ip -> import xxx from "cursor here"
+    {
+      "before": [".", "i", "p"],
+      "after": [
+        "<Esc>",
+        "v",
+        "b",
+        "\"",
+        "a",
+        "d",
+        // insert import
+        "a",
+        "i",
+        "m",
+        "p",
+        "o",
+        "r",
+        "t",
+        " ",
+        // paste xx
+        "<Esc>",
+        "\"",
+        "a",
+        "p",
+        // insert from ""
+        "a",
+        " ",
+        "f",
+        "r",
+        "o",
+        "m",
+        " ",
+        "\""
+      ]
+    },
     // ipC  -> import React,{ Component } from "React";
     {
       "before": ["i", "p", "C"],
