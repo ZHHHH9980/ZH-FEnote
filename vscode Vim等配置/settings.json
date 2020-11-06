@@ -41,9 +41,9 @@
       "before": ["c", "s"],
       "after": ["c", "o", "n", "s", "o", "l", "e", ".", "l", "o", "g", "(", ")"]
     }, */
-    // ct -> const
+    // cn -> const
     {
-      "before": ["c", "t"],
+      "before": ["c", "n"],
       "after": ["c", "o", "n", "s", "t"]
     },
     // xx.log ->  console.log(xx);
@@ -74,6 +74,189 @@
         "\"",
         "a",
         "p"
+      ]
+    },
+    // ipC  -> import React,{ Component } from "React";
+    {
+      "before": ["i", "p", "C"],
+      "after": [
+        "i",
+        "m",
+        "p",
+        "o",
+        "r",
+        "t",
+        " ",
+        "R",
+        "e",
+        "a",
+        "c",
+        "t",
+        ",",
+        "{",
+        "C",
+        "o",
+        "m",
+        "p",
+        "o",
+        "n",
+        "e",
+        "n",
+        "t",
+        "}",
+        " ",
+        "f",
+        "r",
+        "o",
+        "m",
+        " ",
+        "\"",
+        "R",
+        "e",
+        "a",
+        "c",
+        "t",
+        "\"",
+        ";"
+      ]
+    },
+    // ipR  -> import React from "React";
+    {
+      "before": ["i", "p", "R"],
+      "after": [
+        "i",
+        "m",
+        "p",
+        "o",
+        "r",
+        "t",
+        " ",
+        "R",
+        "e",
+        "a",
+        "c",
+        "t",
+        " ",
+        "f",
+        "r",
+        "o",
+        "m",
+        " ",
+        "\"",
+        "R",
+        "e",
+        "a",
+        "c",
+        "t",
+        "\"",
+        ";"
+      ]
+    },
+    {
+      "before": [".", "e", "C"],
+      "after": [
+        // take Class Name
+        "<Esc>",
+        "v",
+        "b",
+        "\"",
+        "a",
+        "d",
+        // enter insert Mode
+        "a",
+        // input class
+        "c",
+        "l",
+        "a",
+        "s",
+        "s",
+        " ",
+        // paste Class Name
+        "<Esc>",
+        "\"",
+        "a",
+        "p",
+        // input
+        /*         
+        class Header extends Component {
+            render(){
+                return( cursor here )
+            }
+        }
+
+        export default Header;
+        */
+        "a",
+        " ",
+        "e",
+        "x",
+        "t",
+        "e",
+        "n",
+        "d",
+        "s",
+        " ",
+        "C",
+        "o",
+        "m",
+        "p",
+        "o",
+        "n",
+        "e",
+        "n",
+        "t",
+        " ",
+        "{",
+        "<Enter>",
+        "r",
+        "e",
+        "n",
+        "d",
+        "e",
+        "r",
+        "(",
+        ")",
+        "{",
+        "<Enter>",
+        "r",
+        "e",
+        "t",
+        "u",
+        "r",
+        "n",
+        "(",
+        // input
+        // export default Header;
+        "<Esc>",
+        "G",
+        "o",
+        "<Enter>",
+        "e",
+        "x",
+        "p",
+        "o",
+        "r",
+        "t",
+        " ",
+        "d",
+        "e",
+        "f",
+        "a",
+        "u",
+        "l",
+        "t",
+        " ",
+        "<Esc>",
+        "\"",
+        "a",
+        "p",
+        "a",
+        ";",
+        // bact to the render()
+        "<Esc>",
+        "4",
+        "k",
+        "i"
       ]
     }
   ],
@@ -245,6 +428,12 @@
       // use `a go back
       "after": ["m", "a", "$", "a", ";", "<Esc>", "`", "a"]
     },
+    // add , at the end of the sentence
+    {
+      "before": ["a", ","],
+      "after": ["$", "a", ","]
+    },
+
     // add "" surrounding a word
     {
       "before": ["a", "\""],
