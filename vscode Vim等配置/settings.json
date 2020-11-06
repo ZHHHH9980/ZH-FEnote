@@ -24,7 +24,7 @@
   "vim.sneak": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
@@ -36,9 +36,15 @@
   // 非递归指的是remap全部恢复出厂设置
   "vim.insertModeKeyBindingsNonRecursive": [
     // cc -> console.log()
-    {
+    /* 暂停使用 
+     {
       "before": ["c", "s"],
       "after": ["c", "o", "n", "s", "o", "l", "e", ".", "l", "o", "g", "(", ")"]
+    }, */
+    // ct -> const
+    {
+      "before": ["c", "t"],
+      "after": ["c", "o", "n", "s", "t"]
     },
     // xx.log ->  console.log(xx);
     {
@@ -262,6 +268,80 @@
     {
       "before": ["a", "'"],
       "after": ["\"", "a", "d", "i", "w", "i", "'", "<Esc>", "\"", "a", "p"]
+    },
+    // add ()  a word
+    {
+      "before": ["a", "("],
+      "after": [
+        "\"",
+        "a",
+        "d",
+        "i",
+        "w",
+        "i",
+        "(",
+        ")",
+        "<Esc>",
+        "h",
+        "\"",
+        "a",
+        "p"
+      ]
+    },
+    {
+      "before": ["a", ")"],
+      "after": [
+        "\"",
+        "a",
+        "d",
+        "i",
+        "w",
+        "i",
+        "(",
+        ")",
+        "<Esc>",
+        "h",
+        "\"",
+        "a",
+        "p"
+      ]
+    },
+    // add <>  a word
+    {
+      "before": ["a", "<"],
+      "after": [
+        "\"",
+        "a",
+        "d",
+        "i",
+        "w",
+        "i",
+        "<",
+        ">",
+        "<Esc>",
+        "h",
+        "\"",
+        "a",
+        "p"
+      ]
+    },
+    {
+      "before": ["a", ">"],
+      "after": [
+        "\"",
+        "a",
+        "d",
+        "i",
+        "w",
+        "i",
+        "<",
+        ">",
+        "<Esc>",
+        "h",
+        "\"",
+        "a",
+        "p"
+      ]
     },
     {
       "before": ["<space>"],
