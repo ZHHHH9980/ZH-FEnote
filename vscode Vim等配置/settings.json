@@ -1,6 +1,6 @@
 {
   "workbench.colorTheme": "Tiny Light",
-  "window.zoomLevel": 0,
+  "window.zoomLevel": 1,
   "files.autoSave": "onFocusChange",
 
   "editor.fontSize": 20,
@@ -24,7 +24,7 @@
   "vim.sneak": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
@@ -46,6 +46,32 @@
       "before": ["c", "n"],
       "after": ["c", "o", "n", "s", "t"]
     },
+    // exco -> export const
+    {
+      "before": ["e", "x", "c", "o"],
+      "after": ["e", "x", "p", "o", "r", "t", " ", "c", "o", "n", "s", "t"]
+    },
+    // exde -> export default
+    {
+      "before": ["e", "x", "d", "e"],
+      "after": [
+        "e",
+        "x",
+        "p",
+        "o",
+        "r",
+        "t",
+        " ",
+        "d",
+        "e",
+        "f",
+        "a",
+        "u",
+        "l",
+        "t"
+      ]
+    },
+
     // xx.log ->  console.log(xx);
     {
       "before": [".", "l", "o", "g"],
@@ -82,7 +108,7 @@
       "after": [
         "<Esc>",
         "v",
-        "b",
+        "^",
         "\"",
         "a",
         "d",
@@ -108,7 +134,10 @@
         "o",
         "m",
         " ",
-        "\""
+        "\"",
+        "\"",
+        "<Esc>",
+        "i"
       ]
     },
     // ipC  -> import React,{ Component } from "React";
@@ -292,6 +321,28 @@
         "4",
         "k",
         "i"
+      ]
+    },
+    // /nst -> need a single tag
+    // it really usefull when typing React
+    // example: <Tag>(input: /nst)</Tag> -> <Tag/>
+    {
+      "before": ["/", "n", "s", "t"],
+      "after": [
+        "<Esc>",
+        "v",
+        "T",
+        "<",
+        "h",
+        "d",
+        "l",
+        "d",
+        "w",
+        "f",
+        ">",
+        "i",
+        " ",
+        "/"
       ]
     }
   ],
@@ -567,6 +618,44 @@
         "p"
       ]
     },
+    // add {} surround a word
+    {
+      "before": ["a", "{"],
+      "after": [
+        "\"",
+        "a",
+        "d",
+        "i",
+        "w",
+        "i",
+        "{",
+        "}",
+        "<Esc>",
+        "h",
+        "\"",
+        "a",
+        "p"
+      ]
+    },
+    // add {} surround a word
+    {
+      "before": ["a", "}"],
+      "after": [
+        "\"",
+        "a",
+        "d",
+        "i",
+        "w",
+        "i",
+        "{",
+        "}",
+        "<Esc>",
+        "h",
+        "\"",
+        "a",
+        "p"
+      ]
+    },
     {
       "before": ["<space>"],
       "after": ["a"]
@@ -620,5 +709,6 @@
   "launch": {
     "configurations": [],
     "compounds": []
-  }
+  },
+  "json.schemas": []
 }
