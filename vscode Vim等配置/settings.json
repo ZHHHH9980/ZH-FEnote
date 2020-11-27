@@ -1,7 +1,6 @@
 {
   "workbench.colorTheme": "Tiny Light",
-  "window.zoomLevel": 1,
-  "files.autoSave": "onFocusChange",
+  "window.zoomLevel": 0,
 
   "editor.fontSize": 20,
   "editor.lineNumbers": "relative",
@@ -24,7 +23,7 @@
   "vim.sneak": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
@@ -78,8 +77,7 @@
       "after": [
         "<Esc>",
         "v",
-        "T",
-        "<Space>",
+        "^",
         "\"",
         "a",
         "d",
@@ -710,5 +708,26 @@
     "configurations": [],
     "compounds": []
   },
-  "json.schemas": []
+  "json.schemas": [],
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "build/": true,
+    "temp/": true,
+    "library/": true,
+    "**/*.anim": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/*.meta": true,
+    "library/": true,
+    "local/": true,
+    "temp/": true
+  },
+  "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
+  "workbench.statusBar.visible": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  // 括号插件
+  "bracket-pair-colorizer-2.colors": ["Brown", "skyBlue", "Crimson"]
 }
