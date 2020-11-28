@@ -23,7 +23,7 @@
   "vim.sneak": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
@@ -214,13 +214,68 @@
         ";"
       ]
     },
+    // 大杀器
+    // .iC -> 初始化一个React Class组件
+    /*         
+        import React,{Component} from React;
+        class Header extends Component {
+            render(){
+                return( cursor here )
+            }
+        }
+
+        export default Header;
+        */
     {
-      "before": [".", "e", "C"],
+      "before": [".", "i", "C"],
       "after": [
+        // import React,{Component} from "react";
+        "<Esc>",
+        "O",
+        "i",
+        "m",
+        "p",
+        "o",
+        "r",
+        "t",
+        " ",
+        "R",
+        "e",
+        "a",
+        "c",
+        "t",
+        ",",
+        "{",
+        "C",
+        "o",
+        "m",
+        "p",
+        "o",
+        "n",
+        "e",
+        "n",
+        "t",
+        "}",
+        " ",
+        "f",
+        "r",
+        "o",
+        "m",
+        " ",
+        "\"",
+        "r",
+        "e",
+        "a",
+        "c",
+        "t",
+        "\"",
+        ";",
+        "<Enter>",
         // take Class Name
         "<Esc>",
+        "j",
         "v",
-        "b",
+        "$",
         "\"",
         "a",
         "d",
@@ -238,7 +293,7 @@
         "\"",
         "a",
         "p",
-        // input
+        // output
         /*         
         class Header extends Component {
             render(){
