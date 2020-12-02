@@ -23,7 +23,7 @@
   "vim.sneak": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
@@ -214,13 +214,68 @@
         ";"
       ]
     },
+    // 大杀器
+    // .iC -> 初始化一个React Class组件
+    /*         
+        import React,{Component} from React;
+        class Header extends Component {
+            render(){
+                return( cursor here )
+            }
+        }
+
+        export default Header;
+        */
     {
-      "before": [".", "e", "C"],
+      "before": [".", "i", "C"],
       "after": [
+        // import React,{Component} from "react";
+        "<Esc>",
+        "O",
+        "i",
+        "m",
+        "p",
+        "o",
+        "r",
+        "t",
+        " ",
+        "R",
+        "e",
+        "a",
+        "c",
+        "t",
+        ",",
+        "{",
+        "C",
+        "o",
+        "m",
+        "p",
+        "o",
+        "n",
+        "e",
+        "n",
+        "t",
+        "}",
+        " ",
+        "f",
+        "r",
+        "o",
+        "m",
+        " ",
+        "\"",
+        "r",
+        "e",
+        "a",
+        "c",
+        "t",
+        "\"",
+        ";",
+        "<Enter>",
         // take Class Name
         "<Esc>",
+        "j",
         "v",
-        "b",
+        "$",
         "\"",
         "a",
         "d",
@@ -238,7 +293,7 @@
         "\"",
         "a",
         "p",
-        // input
+        // output
         /*         
         class Header extends Component {
             render(){
@@ -377,7 +432,25 @@
       "after": ["c", "`", "`", "<Esc>", "j", "\"", "a", "p"]
     }
   ],
+
   "vim.visualModeKeyBindingsNonRecursive": [
+    /* TODO: in visual mode, putting the "y", which can make the cursor
+     stop in the end instead of the start 
+     大杀器！
+     实现的大概思路是:
+     V -> line Visual mode 先使用macro（宏） record 光标移动位置
+     之后按y 
+     1.stop the recording
+     2. yank
+     3. @a repeat 
+     */
+    // when you put "y" it won't yank immediately, it should stop the record first
+    /* {
+      "before": ["y"],
+      "after": ["q", "y", "@", "z"]
+    }, */
+    // 后面需要消除V 带来的副作用 也就是清除record
+
     // 跟norm模式下统一方向
     {
       "before": ["k"],
@@ -406,8 +479,9 @@
       "before": ["o"],
       "after": ["i"]
     },
+
     // 删除的内容放入a寄存器中
-    { "before": ["c"], "after": ["\"", "a", "c"] },
+    { "before": ["c"], "after": ["q", "\"", "a", "c"] },
     { "before": ["C"], "after": ["\"", "a", "C"] },
     {
       "before": ["d"],
@@ -461,6 +535,16 @@
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
+    /* TODO: in visual mode, putting the "y", which can make the cursor
+     stop in the end instead of the start 
+     */
+
+    // first: when you put the "V" it will start to record what you do
+    // 搞不出来 会有奇怪的定位问题
+    /* {
+      "before": ["V"],
+      "after": ["V", "q", "z"]
+    }, */
     {
       "before": ["h"],
       "after": ["i"]
@@ -654,10 +738,12 @@
         "p"
       ]
     },
+    // 使用空格<space>代替a enter insert mode
     {
       "before": ["<space>"],
       "after": ["a"]
     },
+    // adjust ↑↓←→
     {
       "before": ["k"],
       "after": ["j"]
@@ -693,14 +779,72 @@
     {
       "before": ["d", "J"],
       "after": ["d", "^"]
+    },
+    /* 
+    这部分复制粘贴的选择思路:
+    ayy -> ap
+    byy -> bp
+    这样可以迅速复制多个内容，比如单词 并且一一对应 非常舒服
+    仅支持a-e这么多个regsiter
+    够用
+    */
+    // yank 复制
+    // ay -> "ay
+    // 直接放入 register a
+    {
+      "before": ["a", "y"],
+      "after": ["\"", "a", "y"]
+    },
+    // by -> "by
+    // 以下同理
+    {
+      "before": ["b", "y"],
+      "after": ["\"", "b", "y"]
+    },
+    {
+      "before": ["c", "y"],
+      "after": ["\"", "c", "y"]
+    },
+    {
+      "before": ["d", "y"],
+      "after": ["\"", "d", "y"]
+    },
+    {
+      "before": ["e", "y"],
+      "after": ["\"", "e", "y"]
+    },
+    // paste 快捷粘贴
+    {
+      "before": ["a", "p"],
+      "after": ["\"", "a", "p"]
+    },
+    // by -> "by
+    // 以下同理
+    {
+      "before": ["b", "p"],
+      "after": ["\"", "b", "p"]
+    },
+    {
+      "before": ["c", "p"],
+      "after": ["\"", "c", "p"]
+    },
+    {
+      "before": ["d", "p"],
+      "after": ["\"", "d", "p"]
+    },
+
+    {
+      "before": ["e", "p"],
+      "after": ["\"", "e", "p"]
     }
   ],
 
   "vim.handleKeys": {
-    "<C-a>": false,
+    // crlt + a 可用于visual block 递增
+    // "<C-a>": false,
     "<C-f>": false,
     "<C-n>": false,
-    "<C-c>": false,
+    // "<C-c>": false,
     "<C-x>": false,
     "<C-y>": false
   },
