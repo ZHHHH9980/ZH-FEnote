@@ -152,7 +152,7 @@ function echo(arg: any): any {
 const result: string = echo(1)
 ```
 
-那么可以在result写入**任何类型也不会报错**，这样就没法满足类型检验的需求；
+那么可以在result写入**任何类型也不会报错**，这样就没法**满足入参和返回值类型相同**的需求；
 
 
 
@@ -180,5 +180,46 @@ function swap<T, U>(tuple: [T, U]): [U, T] {
 }
 
 const result = swap(['string', 123])
+```
+
+
+
+### 约束泛型
+
+假设有这样的需求场景:
+
+```tsx
+function echoWithArr<T>(arg: T[]): T[] {
+    console.log(arg.length);
+    return arg
+}
+```
+
+我们有时候需要传入的可能不只是array类型，string，类数组都具有length属性；
+
+这时候就需要用到`约束泛型`：
+
+```tsx
+interface IWithLength {
+  length: number;
+}
+function echoWithLength<T extends IWithLength>(arg: T): T {
+  console.log(arg.length);
+  return arg;
+}
+echoWithLength("string");
+echoWithLength([1, 2, 3]);
+```
+
+传入的obj只要具有`length`属性即可；
+
+
+
+### 类
+
+```tsx
+class Queue<T> {
+    private data = []
+}
 ```
 
