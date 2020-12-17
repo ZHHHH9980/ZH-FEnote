@@ -63,7 +63,27 @@ interface Person {
 }
 ```
 
+### 约束class类
 
+interface的特点是抽象一些重复的逻辑，将其整合到一起，不论是对象，类，甚至是interface都能够被其所约束；
+
+```ts
+interface Radio {
+  id: number;
+  switchRadio(): void;
+}
+
+class Car implements Radio {
+  id: 1;
+  switchRadio() {
+    return 1;
+  }
+}
+// 没有严谨地实现接口，会有提示信息
+class CellPhone implements Radio {
+  switchRadio() {}
+}
+```
 
 
 
