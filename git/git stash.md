@@ -18,7 +18,9 @@
 
 （2）**git stash list** ：查看stash了哪些存储
 
-（3）**git stash pop** ：命令**恢复之前缓存的工作目录**，将缓存堆栈中的对应stash删除，并将对应修改应用到当前的工作目录下,默认为第一个stash,即stash@{0}，如果要应用并删除其他stash，命令：git stash pop stash@{$num} ，比如应用并删除第二个：git stash pop stash@{1}
+（3）**git stash pop** ：命令**恢复之前缓存的工作目录**，将缓存堆栈中的对应stash删除，并将对应修改应用到当前的工作目录下,默认为第一个stash,
+
+**即` git stash pop stash@{0}`**，如果要应用并删除其他stash，命令：git stash pop stash@{$num} ，比如应用并删除第二个：git stash pop stash@{1}
 
 这个命令结合`git stash list`非常好用；
 
