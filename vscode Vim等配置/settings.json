@@ -23,7 +23,7 @@
   "vim.sneak": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
@@ -71,7 +71,6 @@
       ]
     },
 
-    // xx.log ->  console.log(xx);
     {
       "before": [".", "l", "o", "g"],
       "after": [
@@ -94,6 +93,14 @@
         "o",
         "g",
         "(",
+        "'",
+        "<Esc>",
+        "\"",
+        "a",
+        "p",
+        "l",
+        "a",
+        ",",
         "<Esc>",
         "\"",
         "a",
