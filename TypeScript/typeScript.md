@@ -218,8 +218,137 @@ echoWithLength([1, 2, 3]);
 ### 类
 
 ```tsx
+class Queue {
+  private data = [];
+  public push(el) {
+    return this.data.push(el);
+  }
+  public pop() {
+    return this.data.shift();
+  }
+}
+
+let q = new Queue();
+q.push("str");
+console.log(q.pop().toFixed());
+```
+
+假设我们维护这样一个队列，我们将`string`类型数据传入，但是ts无法预先捕捉到，因为它无法判断我们究竟传入了哪些数据类型；
+
+解决方案一：
+
+```ts
+class Queue {
+  private data = [];
+  public push(el:number) {
+    return this.data.push(el);
+  }
+  public pop():number {
+    return this.data.shift();
+  }
+}
+
+let q = new Queue();
+q.push("str");
+console.log(q.pop().toFixed());
+```
+
+这样确实能够提前捕捉到问题，但是如果代码量大，复用就非常麻烦；
+
+解决方案二：
+
+使用泛型约束类
+
+```ts
 class Queue<T> {
-    private data = []
+  private data = [];
+  public push(el: T) {
+    return this.data.push(el);
+  }
+  public pop():T {
+    return this.data.shift();
+  }
+}
+
+let q = new Queue<number>();
+//	Argument of type 'string' is not assignable to parameter of type 'number'.ts(2345)
+q.push("str");
+console.log(q.pop().toFixed())
+```
+
+传入string类型也会被提前捕捉到错误
+
+```ts
+class Queue<T> {
+  private data = [];
+  public push(el: T) {
+    return this.data.push(el);
+  }
+  public pop():T {
+    return this.data.shift();
+  }
+}
+
+let q = new Queue<string>();
+q.push("str");
+// Property 'toFixed' does not exist on type 'string'. Did you mean 'fixed'?
+console.log(q.pop().toFixed())
+```
+
+
+
+## 类型别名
+
+type-aliases
+
+```ts
+// 抽象出一种函数类型并且命名
+type sumFn = (a: number, b: number) => number;
+
+const sum: sumFn = (a, b) => a + b;
+```
+
+
+
+## 类型断言
+
+type-assertion
+
+假设我们需要获取`number | string`类型的长度，但ts没办法预先知道到底传入的是什么类型；
+
+```ts
+const getLength(a: number | string) :string {
+ // Property 'toFixed' does not exist on type 'string'.ts(2339)
+  return a.toFixed().length;
 }
 ```
+
+这时候就需要用到类型断言
+
+```ts
+const getLength = (a: number | string): number => {
+  const str = a as String;
+  if (str.length) {
+    return str.length;
+  } else {
+    const number = a as Number;
+    return number.toFixed().length;
+  }
+};
+console.log(getLength(111)) // 3
+```
+
+更简洁的写法：
+
+```ts
+const getLength = (a: number | string): number => {
+  if ((<string>a).length) {
+    return (<string>a).length;
+  } else {
+    return (<number>a).toFixed().length;
+  }
+};
+```
+
+特别需要注意的是`type-assertion`只能够断言存在的类型；例子中只能够断言`number | string`;
 
