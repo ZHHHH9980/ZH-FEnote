@@ -348,3 +348,94 @@ document.addEventListener('click', () => {
 })
 ```
 
+
+
+## Prefetch Preload 
+
+异步的逻辑代码可以单独抽离出一个chunk，进行按需加载，减少首屏代码加载负担。
+
+```js
+// src/index.js
+document.addEventListener('click', () => {
+    import('./click.js').then(func => {
+        func();
+    })
+})
+```
+
+```js
+// src/click.js
+const handleClick = () => {
+    const ele = document.createElement("div");
+    ele.innerHTML = "How zhong";
+    document.body.appendChild(ele);
+}
+
+export default handleClick;
+```
+
+这样只有在点击的时候才会去发起请求加载click这个chunk，但是也伴随着一个问题，如果这个chunk过大，加载时间过长，就会导致页面卡顿，影响用户体验；
+
+
+
+`Prefetch`和`Preload`，顾名思义，预先获取和预先加载，二者区别：
+
+`Prefetch`：等到主要逻辑代码加载完才发起请求
+
+`Preload`：同主要逻辑代码一起加载
+
+语法跟之前命名chunk类似：
+
+```js
+// src/index.js
+document.addEventListener('click', () => {
+    import(/* webpackPrefetch: true */'./click.js').then(func => {
+        func();
+    })
+})
+```
+
+
+
+## webpack&浏览器缓存
+
+```js
+// webpack.common.js
+module.exports = {
+    //...
+    output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "../dist"),
+  },
+}
+```
+
+如果在`production` mode下输出main.js，下次将该文件传送到服务器上，用户刷新并不会再次请求，而是走浏览器缓存。
+
+解决方案：`contenthash`
+
+```js
+// webpack.dev.js
+const proConfig = {
+  //...
+  output: {
+    filename: "[name].[contentHash].js",
+    path: path.resolve(__dirname, "../dist"),
+  },
+};
+module.exports = merge(commonConfig, proConfig);
+```
+
+:star:如果文件内容不变，那么打包生成的hash也将不变；
+
+
+
+## shimming
+
+> 作用：
+>
+> 1. 全局注入，自动引入lodash等依赖
+> 2. 修改全局变量，如this等
+
+[shimming](https://webpack.js.org/guides/shimming/)
+

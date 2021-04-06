@@ -1,8 +1,14 @@
+/*
+ * @Author: How Zhong
+ * @Date: 2020-11-06 23:07:55
+ * @LastEditors: your name
+ * @LastEditTime: 2021-01-31 16:00:32
+ * @Description: file content
+ */
 {
   "workbench.colorTheme": "Tiny Light",
-  "window.zoomLevel": 0,
 
-  "editor.fontSize": 20,
+  "editor.fontSize": 21,
   "editor.lineNumbers": "relative",
   "editor.formatOnSave": true,
   "editor.hover.delay": 0,
@@ -21,9 +27,11 @@
   "vim.useSystemClipboard": true,
   "vim.easymotion": true,
   "vim.sneak": true,
+  // "agr 指定使用某个寄存器replace | [motion] example:aw i"
+  "vim.replaceWithRegister": true,
   "vim.surround": true,
   "vim.enableNeovim": true,
-  "vim.neovimPath": "C:\\Users\\zhongh.ext\\Downloads\\nvim-win64\\Neovim\\bin\\nvim.exe",
+  "vim.neovimPath": "C:\\Users\\how浩\\nvim-win64\\Neovim\\bin\\nvim.exe",
   // 前一个是转义字符
   "vim.leader": "\\",
   "vim.insertModeKeyBindings": [
@@ -44,6 +52,10 @@
     {
       "before": ["c", "n"],
       "after": ["c", "o", "n", "s", "t"]
+    },
+    {
+      "before": ["r", "n"],
+      "after": ["r", "e", "t", "u", "r", "n"]
     },
     // exco -> export const
     {
@@ -71,6 +83,7 @@
       ]
     },
 
+    // xx.log ->  console.log(xx);
     {
       "before": [".", "l", "o", "g"],
       "after": [
@@ -107,6 +120,7 @@
         "p"
       ]
     },
+
     // xxx.ip -> import xxx from "cursor here"
     {
       "before": [".", "i", "p"],
@@ -406,7 +420,6 @@
       ]
     }
   ],
-
   "vim.visualModeKeyBindings": [
     // 以下操作是在视图模式下在选中的两端快速添加,(),[],{},'',"",<>,``
     // 意为 add + ()
@@ -441,6 +454,45 @@
   ],
 
   "vim.visualModeKeyBindingsNonRecursive": [
+    // R 替代 r
+    {
+      "before": ["R"],
+      "after": ["r"]
+    },
+    // default go replace
+    // 默认复制
+    {
+      "before": ["r"],
+      "after": ["\"", "a", "g", "r"]
+    },
+    // go replace
+    {
+      "before": ["a", "r"],
+      "after": ["\"", "a", "g", "r"]
+    },
+
+    // yank 复制
+    {
+      "before": ["y"],
+      "after": ["\"", "a", "y"]
+    },
+    // delete
+    {
+      "before": ["d"],
+      "after": ["\"", "_", "d"]
+    },
+    {
+      "before": ["n", "d"],
+      "after": ["\"", "a", "d"]
+    },
+    {
+      "before": ["d", "d"],
+      "after": ["\"", "_", "d", "d"]
+    },
+    {
+      "before": ["n", "d", "d"],
+      "after": ["\"", "a", "d", "d"]
+    },
     /* TODO: in visual mode, putting the "y", which can make the cursor
      stop in the end instead of the start 
      大杀器！
@@ -503,19 +555,20 @@
     { "before": ["n", "C"], "after": ["C"] },
     {
       "before": ["d"],
-      "after": ["\"", "a", "d"]
+      "after": ["\"", "_", "d"]
     },
     {
       "before": ["n", "d"],
-      "after": ["d"]
+      "after": ["\"", "a", "d"]
     },
     {
       "before": ["d", "d"],
-      "after": ["\"", "a", "d", "d"]
+      "after": ["\"", "_", "d", "d"]
     },
+    // 放入a寄存器管理
     {
       "before": ["n", "d", "d"],
-      "after": ["d", "d"]
+      "after": ["\"", "a", "d", "d"]
     }
   ],
 
@@ -542,16 +595,34 @@
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
+    // R 替代 r
+    {
+      "before": ["R"],
+      "after": ["r"]
+    },
+    // default go replace
+    // 复制粘贴将放入a寄存器统一管理
+    // example: yiw -> riw replace the word directly
+    {
+      "before": ["r"],
+      "after": ["\"", "a", "g", "r"]
+    },
+    // go replace
+    {
+      "before": ["a", "r"],
+      "after": ["\"", "a", "g", "r"]
+    },
+    {
+      "before": ["b", "r"],
+      "after": ["\"", "b", "g", "r"]
+    },
     /* TODO: in visual mode, putting the "y", which can make the cursor
      stop in the end instead of the start 
      */
-
-    // first: when you put the "V" it will start to record what you do
-    // 搞不出来 会有奇怪的定位问题
-    /* {
-      "before": ["V"],
-      "after": ["V", "q", "z"]
-    }, */
+    {
+      "before": ["<Space>"],
+      "after": ["a"]
+    },
     {
       "before": ["h"],
       "after": ["i"]
@@ -570,30 +641,40 @@
       "before": ["R"],
       "after": ["g", "t"]
     },
+    // yank
+    {
+      "before": ["y"],
+      "after": ["\"", "a", "y"]
+    },
     // 修改逻辑：
     // 1. dd c删除的内容放入a寄存器中, 也就是一般不需要使用的脏值放入a寄存器
     // 2. 输入n dd 表示 need content delete 需要delete的content, 这样输入的话会剪切
-    { "before": ["c"], "after": ["\"", "a", "c"] },
-    { "before": ["C"], "after": ["\"", "a", "C"] },
-    { "before": ["n", "c"], "after": ["c"] },
-    { "before": ["n", "C"], "after": ["C"] },
+    { "before": ["c"], "after": ["\"", "_", "c"] },
+    { "before": ["C"], "after": ["\"", "_", "C"] },
+    { "before": ["n", "c"], "after": ["\"", "a", "c"] },
+    { "before": ["n", "C"], "after": ["\"", "a", "C"] },
     {
       "before": ["d"],
-      "after": ["\"", "a", "d"]
+      "after": ["\"", "_", "d"]
     },
     {
       "before": ["n", "d"],
-      "after": ["d"]
+      "after": ["\"", "a", "d"]
     },
     {
       "before": ["d", "d"],
-      "after": ["\"", "a", "d", "d"]
+      "after": ["\"", "_", "d", "d"]
     },
     {
       "before": ["n", "d", "d"],
-      "after": ["d", "d"]
+      "after": ["\"", "a", "d", "d"]
     },
-
+    // paste default register:a
+    // 统一默认寄存器:a
+    {
+      "before": ["p"],
+      "after": ["\"", "a", "p"]
+    },
     {
       // 当行尾部快速添加分号
       // 但是这里会留在末尾，看看能不能改进一下
@@ -746,10 +827,6 @@
       ]
     },
     // 使用空格<space>代替a enter insert mode
-    {
-      "before": ["<space>"],
-      "after": ["a"]
-    },
     // adjust ↑↓←→
     {
       "before": ["k"],
@@ -855,11 +932,7 @@
     "<C-x>": false,
     "<C-y>": false
   },
-  "launch": {
-    "configurations": [],
-    "compounds": []
-  },
-  "json.schemas": [],
+
   "search.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,
@@ -880,5 +953,97 @@
   "workbench.statusBar.visible": true,
   "diffEditor.ignoreTrimWhitespace": false,
   // 括号插件
-  "bracket-pair-colorizer-2.colors": ["Brown", "skyBlue", "Crimson"]
+  "bracket-pair-colorizer-2.colors": ["Brown", "skyBlue", "Crimson"],
+  "workbench.iconTheme": "file-icons",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "local-history.daysLimit": 3,
+  "todo-tree.tree.showScanModeButton": false,
+  "git.ignoreWindowsGit27Warning": true,
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": false
+  },
+  "markdown.preview.fontSize": 16,
+  "vscode-neovim.highlightGroups.ignoreHighlights": [
+    "SpecialKey",
+    "EndOfBuffer",
+    "TermCursor",
+    "TermCursorNC",
+    "NonText",
+    "ErrorMsg",
+    "MoreMsg",
+    "ModeMsg",
+    "LineNr",
+    "CursorLineNr",
+    "Question",
+    "StatusLine",
+    "StatusLineNC",
+    "VertSplit",
+    "Title",
+    "VisualNC",
+    "WarningMsg",
+    "WildMenu",
+    "^Diff",
+    "Sign",
+    "SignColumn",
+    "^Spell",
+    "^Pmenu",
+    "^Tab",
+    "^Cursor",
+    "ColorColumn",
+    "QuickFixLine",
+    "Whitespace",
+    "NormalNC",
+    "Normal",
+    "NormalFloat",
+    "MsgSeparator",
+    "MsgArea",
+    "^RedrawDebug",
+    "Cursor",
+    "lCursor",
+    "MatchParen",
+    "^Nvim",
+    "Operator",
+    "Delimiter",
+    "Identifier",
+    "SpecialChar",
+    "Number",
+    "Type",
+    "String",
+    "Error",
+    "Comment",
+    "Constant",
+    "Special",
+    "Statement",
+    "PreProc",
+    "Underlined",
+    "Ignore",
+    "Todo",
+    "Character",
+    "Boolean",
+    "Float",
+    "Function",
+    "Conditional",
+    "Repeat",
+    "Label",
+    "Keyword",
+    "Exception",
+    "Include",
+    "Define",
+    "Macro",
+    "PreCondit",
+    "StorageClass",
+    "Structure",
+    "Typedef",
+    "Tag",
+    "SpecialComment",
+    "Debug",
+    "Folded",
+    "FoldColumn"
+  ],
+  "vscode-neovim.neovimExecutablePaths.linux": "/usr/bin/nvim",
+  "vscode-neovim.neovimInitVimPaths.linux": "/usr/bin/nvim",
+  "vscode-neovim.neovimInitVimPaths.win32": "/usr/bin/nvim",
+  "vscode-neovim.useWSL": true,
+  "window.zoomLevel": -1
 }
